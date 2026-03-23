@@ -1,1 +1,1 @@
-{"name": "escala-project", "version": "1.0.0", "main": "index.js", "license": "MIT"}
+{\n  "name": "your-project-name",\n  "version": "1.0.0",\n  "scripts": {\n    "dev": "vite",\n    "build": "vite build",\n    "serve": "vite preview"\n  },\n  "dependencies": {\n    "react": ">=17.0.0",\n    "react-dom": ">=17.0.0",\n    "@capacitor/core": "latest",\n    "@capacitor/cli": "latest"\n  },\n  "devDependencies": {\n    "vite": "latest",\n    "@vitejs/plugin-react": "latest"\n  },\n  "browserslist": [\n    "last 2 versions"\n  ],\n  "homepage": ".",\n  "license": "MIT"\n}
