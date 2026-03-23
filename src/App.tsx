@@ -1,0 +1,1 @@
+import React from 'react';\n\nfunction App() {\n    return (\n        <div>\n            <h1>Welcome to Escalas Project</h1>\n        </div>\n    );\n}\n\nexport default App;

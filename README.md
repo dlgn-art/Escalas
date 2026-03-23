@@ -1,0 +1,1 @@
+# Escalas Project\n\nThis project is intended to demonstrate the scaling capabilities of various algorithms.
