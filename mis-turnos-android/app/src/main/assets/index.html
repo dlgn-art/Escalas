@@ -36,7 +36,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 .d .s{font-size:clamp(18px,5vw,24px);font-weight:800}
 .d.out{opacity:.35}
 .d.today{box-shadow:0 0 0 3px var(--ink)}
-.d.ch::after{content:"";position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--ink);border:1.5px solid var(--bg)}
+
 .d.fe .n{color:#d6293e;font-weight:800;opacity:1}
 .c-M{background:var(--M);color:var(--Mi);border-color:transparent}.c-T{background:var(--T);color:var(--Ti);border-color:transparent}.c-N{background:var(--N);color:var(--Ni);border-color:transparent}.c-D{background:var(--D);color:var(--Di)}.c-V{background:var(--V);color:var(--Vi);border-color:transparent}.c-B{background:var(--B);color:var(--Bi);border-color:transparent}.c-AP{background:var(--A);color:var(--Ai);border-color:transparent}.c-E{background:var(--E);color:var(--Ei);border-color:transparent}.c-O{background:var(--O);color:var(--Oi);border-color:transparent}
 .d .g{font-size:11px;position:absolute;bottom:2px;right:5px;opacity:.75;font-weight:600}.d .s.sm{font-size:clamp(14px,4vw,18px)}
@@ -65,7 +65,7 @@ input,select{width:100%;height:44px;border-radius:10px;border:1px solid var(--li
 .sheet{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;justify-content:center;z-index:9}
 .sheet.on{display:flex}
 .panel{background:var(--bg);width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:20px 18px 28px}
-.panel h3{margin:0 0 4px;font-size:22px;text-transform:capitalize}
+.panel h3{margin:0 0 4px;font-size:22px}.panel h3::first-letter{text-transform:uppercase}
 .opts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:14px 0}
 .opt{height:64px;border-radius:12px;border:1px solid var(--line);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
 .opt b{font-size:20px}.opt small{font-size:11px;text-align:center}
@@ -76,6 +76,19 @@ input,select{width:100%;height:44px;border-radius:10px;border:1px solid var(--li
 #st{font-size:13px;color:var(--mut);min-height:20px;margin-top:6px}
 @media(prefers-reduced-motion:no-preference){.panel{animation:up .18s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.4}}}
 @media(max-width:420px){.cal{grid-template-columns:repeat(7,minmax(0,1fr)) 36px;gap:3px}.d{border-radius:8px}.d .n{font-size:11px;left:4px}}
+.d.ch{outline:2px dashed currentColor;outline-offset:-4px}
+.d.hn::before{content:"";position:absolute;top:0;right:0;border-style:solid;border-width:0 14px 14px 0;border-color:transparent var(--ink) transparent transparent;border-top-right-radius:9px}
+.d .ly{position:absolute;left:0;right:0;bottom:0;height:30%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.02em;border-radius:0 0 9px 9px}
+.d.lay .s{opacity:.45;margin-top:-22%}
+.ly-V{background:var(--V);color:var(--Vi)}.ly-B{background:var(--B);color:var(--Bi)}.ly-AP{background:var(--A);color:var(--Ai)}.ly-O{background:var(--O);color:var(--Oi)}
+.mode{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}.mode button{height:40px;padding:0 12px;border-radius:20px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:14px;font-weight:600}
+.mode button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.live{position:sticky;bottom:8px;z-index:5;background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 14px;margin:10px 0;display:none;font-size:15px;line-height:1.35;box-shadow:0 6px 20px #0004}
+.live.on{display:block}.live b{font-size:18px}
+details.nt{background:var(--card);border-radius:12px;padding:10px 12px;margin:6px 0}details.nt summary{cursor:pointer;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}details.nt p{margin:8px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+textarea{font:inherit;font-size:16px;width:100%;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;padding:8px 10px}
+.sub{font-size:13px;color:var(--mut);margin:12px 0 -6px;font-weight:600}
+.lnk{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;padding:8px 0;font-size:14px}
 </style>
 </head>
 <body>
@@ -83,9 +96,14 @@ input,select{width:100%;height:44px;border-radius:10px;border:1px solid var(--li
 <div class="top"><button class="nb" id="prev" aria-label="Mes anterior">‹</button><h1 id="mt">Mis turnos</h1><button class="nb" id="next" aria-label="Mes siguiente">›</button></div>
 <div class="who"><label for="num">Número en la lista</label><select id="num"></select></div>
 <div class="kpi" id="kpi"></div>
+<div class="mode" id="mode" role="group" aria-label="Al tocar un día">
+<button data-m="" class="on">Editar día</button><button data-m="V">Probar vacaciones</button><button data-m="B">Poner baja</button><button data-m="AP">Poner AP</button>
+</div>
 <div class="cal" id="cal"></div>
-<div class="leg"><span><i style="background:var(--M)"></i>M mañana</span><span><i style="background:var(--T)"></i>T tarde</span><span><i style="background:var(--N)"></i>N noche</span><span><i style="background:var(--D)"></i>– saliente</span><span><i></i>L libre</span><span><i style="background:var(--V)"></i>V vacaciones</span><span><i style="background:var(--A)"></i>AP libre disposición</span><span><i style="background:var(--B)"></i>B baja</span><span><i style="background:var(--O)"></i>O otro permiso</span><span>● cambiado a mano</span><span style="color:#d6293e">nº rojo = festivo</span></div>
-<p class="note">Toca un día para cambiarlo. El número pequeño es tu grupo (M1…N6, como en la tabla). A la derecha, las horas de la semana y su número en el ciclo de 35.</p>
+<div class="live" id="live" aria-live="polite"></div>
+<div class="leg"><span><i style="background:var(--M)"></i>M mañana</span><span><i style="background:var(--T)"></i>T tarde</span><span><i style="background:var(--N)"></i>N noche</span><span><i style="background:var(--D)"></i>– saliente</span><span><i></i>L libre</span><span><i style="background:var(--V)"></i>franja VAC vacaciones</span><span><i style="background:var(--B)"></i>BAJA</span><span><i style="background:var(--A)"></i>AP</span><span><i style="background:var(--O)"></i>PERM otro permiso</span><span>◥ tiene nota</span><span>borde discontinuo = turno cambiado</span><span style="color:#d6293e">nº rojo = festivo</span></div>
+<p class="note">Toca un día para cambiar el turno, ponerle vacaciones o baja encima, o escribir una nota. Con «Probar vacaciones» cada toque pone o quita vacaciones al momento y abajo ves cómo cambia el cómputo.</p>
+<div id="notes"></div>
 <div id="st"></div>
 
 <h2 class="yr">Balance del año <select id="ysel" style="width:auto" aria-label="Año"></select></h2>
@@ -94,42 +112,58 @@ input,select{width:100%;height:44px;border-radius:10px;border:1px solid var(--li
 <h2>Horas por mes</h2>
 <div class="scroll" id="year"></div>
 
-<h2>Cambios hechos a mano</h2>
+<h2>Cambios, vacaciones y permisos</h2>
 <div id="chg"></div>
 
 <h2>Ajustes</h2>
 <div class="set" id="set"></div>
-<p class="note">Ciclo: la tabla de 35 semanas de Enfermería Reanimación. Cada número de la lista va una semana por delante del anterior: el 30 de noviembre de 2026 el nº 11 está en la semana 22, el nº 12 en la 23, y así hasta volver a la 1. Cada número guarda sus propios cambios y vacaciones.</p>
-<p class="note">Cómo se calcula: jornada del SERGAS según la tabla de noches (acuerdo de abril de 2023, aplicada en 2026). Turno de día fijo 1.533 h; rotatorio con noches 1.529 − 3 × noches; más de 63 noches, 1.340 h. A las horas de tu cuadrante se les resta esa jornada y las horas que no trabajas por vacaciones. Lo que sobra, en bloques de 7 h, son los AP que te tocan. Un AP cogido en noche gasta 2. Baja (B) y otros permisos (O) cuentan las horas del turno que tocaba. Si el SERGAS publica otra jornada para 2027, ponla en «Jornada anual manual».</p>
+<p class="note">Ciclo: la tabla de 35 semanas de Enfermería Reanimación. Cada número de la lista va una semana por delante del anterior: el 30 de noviembre de 2026 el nº 11 está en la semana 22, el nº 12 en la 23, y así hasta volver a la 1. Cada número guarda sus propios cambios, notas y vacaciones.</p>
+<p class="note">Cómo se calcula: jornada del SERGAS según la tabla de noches (acuerdo de abril de 2023, aplicada en 2026). Turno de día fijo 1.533 h; rotatorio con noches 1.529 − 3 × noches; más de 63 noches, 1.340 h. A las horas de tu cuadrante se les resta esa jornada y las horas de los turnos que te tapan las vacaciones. Lo que sobra, en bloques de 7 h, son los AP que te tocan. Las vacaciones sobre turnos de más horas (noches, semanas cargadas) te dejan más AP. Un AP cogido en noche gasta 2. Baja y otros permisos cuentan las horas del turno que tapan. Si el SERGAS publica otra jornada para 2027, ponla en «Jornada anual manual».</p>
 <p class="note">Fuentes: <a href="https://sanidad.ccoo.es/70832b1b6cd74e3a435f349112978476000058.pdf">tabla de noches SERGAS (CCOO)</a> · <a href="https://www.cig-saude.gal/permisos-e-licenzas.html">permisos y licencias (CIG Saúde)</a> · <a href="https://www.cig-saude.gal/nova/c%C3%B3mputo-de-xornada.html">cómputo de jornada (CIG Saúde)</a></p>
+
+<h2>Copia de seguridad</h2>
+<p class="note">Antes de actualizar o reinstalar la app, copia tus datos y guárdalos (por ejemplo en una nota o en WhatsApp contigo mismo). Después pégalos aquí y pulsa Restaurar.</p>
+<textarea id="bk" rows="4" aria-label="Datos de copia de seguridad" placeholder="Pulsa «Copiar mis datos» o pega aquí una copia"></textarea>
+<div class="row"><button class="btn" id="bkc">Copiar mis datos</button><button class="btn" id="bkr">Restaurar</button></div>
+<div class="note" id="bkm"></div>
 </main>
 
 <div class="sheet" id="sheet"><div class="panel" role="dialog" aria-modal="true" aria-labelledby="sh">
 <h3 id="sh"></h3><div class="note" id="sinfo"></div>
+<div class="sub">Turno</div>
 <div class="opts" id="opts"></div>
-<label for="nota">Nota (opcional, p. ej. «cambio con Pilar»)</label><input id="nota" maxlength="80">
+<div class="sub">Encima del turno</div>
+<div class="opts" id="lays"></div>
+<label for="nota">Nota del día</label><textarea id="nota" rows="3" maxlength="600" placeholder="Ej.: cambio con Pilar, curso, médico…"></textarea>
 <div class="row"><button class="btn" id="reset">Volver a rotación</button><button class="btn p" id="ok">Hecho</button></div>
 </div></div>
 
-<script id="estado" type="application/json">{"v":3,"ts":0,"n":11,"data":{},"hours":{"M":7,"T":7,"N":10},"vacDef":30,"jor":""}</script>
+<script id="estado" type="application/json">{"v":4,"ts":0,"n":11,"data":{},"hours":{"M":7,"T":7,"N":10},"vacDef":30,"jor":""}</script>
 <script>
 {
 const SRC='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
 const ROT=`M1 T1 N1 - L M2 T2|N2 - L L T3 N3 -|L M6 T6 N6 - L L|T2 N2 - L L T1 N1|- L M5 T5 N5 - M5|L M4 T4 N4 - L L|N1 - L M3 M3 L L|M6 T6 N6 - L M4 T4|N4 - L L T2 N2 -|L M5 T5 N5 - L L|T1 N1 - L L T3 N3|- L L T4 N4 - M4|M5 L L M5 T5 N5 -|L L M1 M1 M1 L L|M4 T4 N4 - L M3 T3|N3 - L L T6 N6 -|L M2 T2 N2 - L L|T6 N6 - L M5 T5 N5|- L L T1 N1 - M1|L L M3 T3 N3 - M3|L L M6 M6 M6 L L|M2 T2 N2 - L M5 T5|N5 - L L T1 N1 -|L M3 T3 N3 - L L|T4 N4 - L L T2 N2|- L L T6 N6 - M6|L T5 N5 - L M1 T1|L L M2 M2 M2 L L|M3 T3 N3 - L M6 T6|N6 - L L T4 N4 -|L M1 T1 N1 - L L|T5 N5 - L L T4 N4|- L L T2 N2 - M2|T3 N3 - L L T6 N6|- L M4 M4 M4 L L`.split("|").map(r=>r.split(" "));
-const CODES=[["M","Mañana"],["T","Tarde"],["N","Noche"],["L","Libre"],["-","Saliente"],["V","Vacac."],["AP","Asunto propio"],["B","Baja"],["O","Otro permiso"]];
+const SHIFTS=[["M","Mañana"],["T","Tarde"],["N","Noche"],["L","Libre"],["-","Saliente"]];
+const LAYS=[["","Nada"],["V","Vacaciones"],["B","Baja"],["AP","Asunto propio"],["O","Otro permiso"]];
+const LLAB={V:"VAC",B:"BAJA",AP:"AP",O:"PERM"};
 const MES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const MES3=MES.map(m=>m.slice(0,3));
 const DOW=["L","M","X","J","V","S","D"];
 const DAY=86400000;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const DEF={v:3,ts:0,n:11,data:{},hours:{M:7,T:7,N:10},vacDef:30,jor:""};
+const DEF={v:4,ts:0,n:11,data:{},hours:{M:7,T:7,N:10},vacDef:30,jor:""};
 let S;
+function norm(x){
+if(!x||typeof x!=="object")x={};
+if(x.ov){x.data={11:{ov:x.ov,notes:x.notes||{},vacY:{}}};delete x.ov;delete x.notes}
+x=Object.assign({},DEF,x);x.hours=Object.assign({},DEF.hours,x.hours);x.data=x.data&&typeof x.data==="object"?x.data:{};
+x.n=Math.min(35,Math.max(1,+x.n||11));return x}
 try{S=JSON.parse($("estado").textContent)}catch(e){S={}}
 try{const l=JSON.parse(localStorage.getItem("turnos-diego")||"null");if(l&&l.ts>(S.ts||0))S=l}catch(e){}
-if(S.ov){S.data={11:{ov:S.ov,notes:S.notes||{},vacY:{}}};delete S.ov;delete S.notes}
-S=Object.assign({},DEF,S);S.hours=Object.assign({},DEF.hours,S.hours);S.data=S.data||{};
-S.n=Math.min(35,Math.max(1,+S.n||11));
-const P=()=>{const d=S.data[S.n]||(S.data[S.n]={ov:{},notes:{},vacY:{}});d.ov=d.ov||{};d.notes=d.notes||{};d.vacY=d.vacY||{};return d};
+S=norm(S);
+const P=()=>{const d=S.data[S.n]||(S.data[S.n]={});d.ov=d.ov||{};d.notes=d.notes||{};d.vacY=d.vacY||{};
+if(!d.lay){d.lay={};for(const k in d.ov){const c=d.ov[k];if(["V","B","AP","O","E"].includes(c)){d.lay[k]=c==="E"?"AP":c;delete d.ov[k]}}}return d};
 const key=t=>new Date(t).toISOString().slice(0,10);
 const utc=(y,m,d)=>Date.UTC(y,m,d);
 const parse=k=>{const[a,b,c]=k.split("-").map(Number);return utc(a,b-1,c)};
@@ -140,69 +174,81 @@ const cell=t=>ROT[rotWeek(t)][dow(t)];
 const base=t=>cell(t)[0]==="-"?"-":cell(t)[0];
 const grp=t=>cell(t).slice(1);
 const shift=t=>P().ov[key(t)]||base(t);
+const layer=t=>P().lay[key(t)]||"";
 const sh=c=>"MTN".includes(c)&&c.length===1?(+S.hours[c]||0):0;
-function hoursAt(t){const c=shift(t);if(c==="B"||c==="O")return sh(base(t));return sh(c)}
-const isNight=t=>{const c=shift(t);return c==="N"||((c==="B"||c==="O")&&base(t)==="N")};
-const weight=t=>base(t)==="N"?2:1;
+const off=t=>{const l=layer(t);return l==="V"||l==="AP"};
+const hoursAt=t=>off(t)?0:sh(shift(t));
+const isNight=t=>shift(t)==="N"&&!off(t);
+const weight=t=>shift(t)==="N"?2:1;
 function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=(h+l-7*m+114)%31+1;return utc(y,mo-1,da)}
 function fest(t){const d=new Date(t),m=d.getUTCMonth()+1,dd=d.getUTCDate(),y=d.getUTCFullYear();const f=["1-1","1-6","5-1","5-17","7-25","8-15","10-12","11-1","12-6","12-8","12-25"];const e=easter(y);return f.includes(m+"-"+dd)||t===e-2*DAY||t===e-3*DAY}
 const habil=t=>dow(t)<5&&!fest(t);
 const now=new Date();const TODAY=utc(now.getFullYear(),now.getMonth(),now.getDate());
-let cy,cm;
+let cy,cm,mode="";
 try{const s=sessionStorage.getItem("turnos-mes");if(s){[cy,cm]=s.split("-").map(Number)}}catch(e){}
 if(cy==null){cy=now.getFullYear()<2027?2027:now.getFullYear();cm=now.getFullYear()<2027?0:now.getMonth()}
-function stats(y,m0,m1){const r={h:0,mt:0,n:0,vn:0,vh:0,ap:0,apH:0,vH:0,rot:0,days:0};
-for(let m=m0;m<=m1;m++){const days=new Date(Date.UTC(y,m+1,0)).getUTCDate();for(let d=1;d<=days;d++){const t=utc(y,m,d),c=shift(t);r.h+=hoursAt(t);r.rot+=sh(base(t));
-if(c==="M"||c==="T")r.mt++;if(isNight(t))r.n++;r.days++;if(c==="V"){r.vn++;r.vH+=sh(base(t));if(habil(t))r.vh++}if(c==="AP"||c==="E"){r.ap+=weight(t);r.apH+=sh(base(t))}}}return r}
+function stats(y,m0,m1){const r={h:0,mt:0,n:0,vn:0,vh:0,ap:0,apH:0,vH:0,bn:0,rot:0,days:0};
+for(let m=m0;m<=m1;m++){const days=new Date(Date.UTC(y,m+1,0)).getUTCDate();for(let d=1;d<=days;d++){const t=utc(y,m,d),c=shift(t),l=layer(t);r.h+=hoursAt(t);r.rot+=sh(c);r.days++;
+if((c==="M"||c==="T")&&!off(t))r.mt++;if(isNight(t))r.n++;
+if(l==="V"){r.vn++;r.vH+=sh(c);if(habil(t))r.vh++}if(l==="AP"){r.ap+=weight(t);r.apH+=sh(c)}if(l==="B")r.bn++}}return r}
 const jornada=n=>{const j=parseFloat(S.jor);if(j>0)return j;return n===0?1533:n>63?1340:1529-3*n};
 const fmt=x=>(Math.round(x*10)/10).toLocaleString("es-ES");
+const sg=x=>(x>=0?"+":"−")+fmt(Math.abs(x));
+function calc(y){const r=stats(y,0,11),J=jornada(r.n),d=P();
+const vPlan=d.vacY[y]!=null?+d.vacY[y]:(+S.vacDef||0);
+const avg=r.rot/r.days,vPend=Math.max(0,vPlan-r.vn),vPendH=vPend*avg;
+const after=r.h+r.apH-J-vPendH;const apTot=Math.max(0,Math.floor(after/7));
+return{r,J,vPlan,avg,vPend,vPendH,after,apTot,left:after-apTot*7,apRest:apTot-r.ap}}
 function render(){
 try{sessionStorage.setItem("turnos-mes",cy+"-"+cm)}catch(e){}
 $("mt").textContent=MES[cm]+" "+cy;
 const st=stats(cy,cm,cm);
-$("kpi").innerHTML=`<div><span class="big">${fmt(st.h)}</span> <span>horas en ${MES[cm]}</span></div><span><b>${st.mt}</b> M/T · <b>${st.n}</b> noches${st.vn?` · <b>${st.vn}</b> vac.`:""}${st.ap?` · <b>${st.ap}</b> AP`:""}</span>`;
+$("kpi").innerHTML=`<div><span class="big">${fmt(st.h)}</span> <span>horas en ${MES[cm]}</span></div><span><b>${st.mt}</b> M/T · <b>${st.n}</b> noches${st.vn?` · <b>${st.vn}</b> vac.`:""}${st.ap?` · <b>${st.ap}</b> AP`:""}${st.bn?` · <b>${st.bn}</b> baja`:""}</span>`;
 const first=utc(cy,cm,1);let t=first-dow(first)*DAY;const last=utc(cy,cm+1,0);
 let h=DOW.map(d=>`<div class="dh">${d}</div>`).join("")+`<div class="dh">h</div>`;
 while(t<=last){let wh=0;const w=rotWeek(t)+1;
-for(let i=0;i<7;i++,t+=DAY){const c=shift(t),k=key(t),d=new Date(t);wh+=hoursAt(t);
-const cls=["d","c-"+(c==="-"?"D":c)];if(d.getUTCMonth()!==cm)cls.push("out");if(t===TODAY)cls.push("today");if(P().ov[k])cls.push("ch");if(fest(t))cls.push("fe");
-const g="MTN".includes(c)&&c===base(t)?grp(t):"";
-h+=`<button class="${cls.join(" ")}" data-k="${k}" aria-label="${d.getUTCDate()} ${MES[d.getUTCMonth()]}: ${c}${g}"><span class="n">${d.getUTCDate()}</span><span class="s${c.length>1?" sm":""}">${c==="-"?"–":c}</span>${g?`<span class="g">${g}</span>`:""}</button>`}
+for(let i=0;i<7;i++,t+=DAY){const c=shift(t),l=layer(t),k=key(t),d=new Date(t);wh+=hoursAt(t);
+const cls=["d","c-"+(c==="-"?"D":c)];if(d.getUTCMonth()!==cm)cls.push("out");if(t===TODAY)cls.push("today");if(P().ov[k])cls.push("ch");if(fest(t))cls.push("fe");if(P().notes[k])cls.push("hn");if(l)cls.push("lay");
+const g=!l&&"MTN".includes(c)&&c===base(t)?grp(t):"";
+h+=`<button class="${cls.join(" ")}" data-k="${k}" aria-label="${d.getUTCDate()} ${MES[d.getUTCMonth()]}: ${c}${g}${l?", "+LLAB[l]:""}${P().notes[k]?", con nota":""}"><span class="n">${d.getUTCDate()}</span><span class="s">${c==="-"?"–":c}</span>${g?`<span class="g">${g}</span>`:""}${l?`<span class="ly ly-${l}">${LLAB[l]}</span>`:""}</button>`}
 h+=`<div class="wk"><b>${fmt(wh)}</b>sem ${w}</div>`}
 $("cal").innerHTML=h;
-renderBal();renderYear();renderChg();
+renderNotes();renderLive();renderBal();renderYear();renderChg();
+}
+function renderNotes(){
+const ks=Object.keys(P().notes).filter(k=>{const d=new Date(parse(k));return d.getUTCFullYear()===cy&&d.getUTCMonth()===cm}).sort();
+$("notes").innerHTML=ks.length?`<h2 style="margin-top:18px">Notas de ${MES[cm]}</h2>`+ks.map(k=>{const d=new Date(parse(k)),n=P().notes[k];return`<details class="nt"><summary>${d.getUTCDate()} ${MES3[d.getUTCMonth()]} · ${esc(n.split("\n")[0])}</summary><p>${esc(n)}</p><button class="lnk" data-k="${k}">Editar este día</button></details>`}).join(""):"";
+}
+function renderLive(){
+const L=$("live");if(!mode){L.classList.remove("on");return}
+const c=calc(cy);L.classList.add("on");
+L.innerHTML=`${mode==="V"?"Probando vacaciones":mode==="B"?"Poniendo bajas":"Poniendo AP"} en ${cy}: toca días para poner o quitar.<br><b>${c.r.vn}</b>/${c.vPlan} días de vacaciones (tapan ${fmt(c.r.vH)} h) · <b>${c.apTot} AP</b> por cómputo · saldo <b>${sg(c.left)} h</b>${c.r.bn?` · ${c.r.bn} días de baja`:""}`;
 }
 function renderBal(){
-const y=cy,r=stats(y,0,11),J=jornada(r.n),d=P();
-const vPlan=d.vacY[y]!=null?+d.vacY[y]:(+S.vacDef||0);
-const avg=r.rot/r.days;
-const vPend=Math.max(0,vPlan-r.vn),vPendH=vPend*avg;
-const pre=r.h+r.apH;
-const vacH=r.vH+vPendH;
-const after=pre-J-vPendH;
-const apTot=Math.max(0,Math.floor(after/7)),left=after-apTot*7,apRest=apTot-r.ap;
-$("bal").innerHTML=`<div class="vin"><label for="vacy">Vacaciones que coges en ${y} (días naturales)</label><input id="vacy" type="number" min="0" max="60" inputmode="numeric" value="${vPlan}"></div>
+const y=cy,c=calc(y),r=c.r;
+$("bal").innerHTML=`<div class="vin"><label for="vacy">Vacaciones que coges en ${y} (días naturales)</label><input id="vacy" type="number" min="0" max="60" inputmode="numeric" value="${c.vPlan}"></div>
 <div class="bal">
-<div class="box"><b>${fmt(r.h+r.apH+r.vH)}</b><span>horas de tu cuadrante en ${y}</span></div>
-<div class="box"><b>${fmt(J)}</b><span>jornada SERGAS con ${r.n} noches${parseFloat(S.jor)>0?" (manual)":""}</span></div>
-<div class="box"><b>−${fmt(vacH)}</b><span>horas que no trabajas por ${vPlan} días de vacaciones${r.vn?` (${r.vn} ya marcados)`:""}</span></div>
-<div class="box hi"><b>${apTot} AP</b><span>te tocan por cómputo (${fmt(after)} h ÷ 7)</span></div>
-<div class="box"><b>${r.ap} / ${apTot}</b><span>AP ya cogidos (noche = 2)</span><div class="meter"><i style="width:${apTot?Math.min(100,r.ap/apTot*100):0}%"></i></div></div>
-<div class="box"><b>${left>=0?"+":""}${fmt(left)} h</b><span>te quedarías a final de año</span></div>
+<div class="box"><b>${fmt(r.rot)}</b><span>horas de tu cuadrante en ${y}</span></div>
+<div class="box"><b>${fmt(c.J)}</b><span>jornada SERGAS con ${r.n} noches${parseFloat(S.jor)>0?" (manual)":""}</span></div>
+<div class="box"><b>−${fmt(r.vH+c.vPendH)}</b><span>horas que tapan ${c.vPlan} días de vacaciones (${r.vn} marcados en el calendario)</span></div>
+<div class="box hi"><b>${c.apTot} AP</b><span>te tocan por cómputo (${fmt(c.after)} h ÷ 7)</span></div>
+<div class="box"><b>${r.ap} / ${c.apTot}</b><span>AP ya puestos (noche = 2)</span><div class="meter"><i style="width:${c.apTot?Math.min(100,r.ap/c.apTot*100):0}%"></i></div></div>
+<div class="box"><b>${sg(c.left)} h</b><span>te quedarías a final de año</span></div>
 </div>
-<p class="verdict">${after<0?`Con ${vPlan} días de vacaciones te faltarían <b>${fmt(-after)} h</b> para llegar a la jornada: no te toca ningún AP.`:`Con ${vPlan} días de vacaciones te tocan <b>${apTot} AP</b>${apRest>0?` (te quedan <b>${apRest}</b> por coger)`:apRest<0?` (has cogido <b>${-apRest}</b> de más)`:" y ya los has cogido todos"}, y te quedarías con <b>${left>=0?"+":""}${fmt(left)} h</b> de saldo.`}</p>
-<p class="note">${vPend?`Los ${vPend} días de vacaciones que aún no has marcado se estiman en ${fmt(avg)} h por día (media de tu cuadrante). Al marcarlos con V en el calendario se usan las horas exactas de esos turnos.`:`Todas las vacaciones están marcadas en el calendario: el cálculo usa las horas exactas.`}</p>`;
+<p class="verdict">${c.after<0?`Con ${c.vPlan} días de vacaciones te faltarían <b>${fmt(-c.after)} h</b> para llegar a la jornada: no te toca ningún AP.`:`Con ${c.vPlan} días de vacaciones te tocan <b>${c.apTot} AP</b>${c.apRest>0?` (te quedan <b>${c.apRest}</b> por poner)`:c.apRest<0?` (has puesto <b>${-c.apRest}</b> de más)`:" y ya los has puesto todos"}, y te quedarías con <b>${sg(c.left)} h</b> de saldo.`}</p>
+<p class="note">${c.vPend?`Los ${c.vPend} días de vacaciones que aún no has marcado se estiman en ${fmt(c.avg)} h por día (media de tu cuadrante). Al marcarlos en el calendario se usan las horas exactas de los turnos que tapan: coger vacaciones sobre noches o semanas cargadas te deja más AP.`:`Todas las vacaciones están marcadas en el calendario: el cálculo usa las horas exactas.`}${r.bn?` Tienes ${r.bn} días de baja: cuentan las horas del turno que tapan.`:""}</p>
+<button class="lnk" id="clrV">Quitar todas las vacaciones de ${y}</button> · <button class="lnk" id="clrA">Quitar todos los AP de ${y}</button>`;
 }
 function renderYear(){
 const y=cy;let max=1;const rows=[];
 for(let m=0;m<12;m++){const s=stats(y,m,m);rows.push(s);max=Math.max(max,s.h)}
 const T=stats(y,0,11);
-$("year").innerHTML=`<table><thead><tr><th>Mes</th><th>Horas</th><th>M/T</th><th>N</th><th>Vac</th><th>AP</th></tr></thead><tbody>${rows.map((s,m)=>`<tr class="${m===cm?"cur":""}"><td style="width:45%">${MES[m]}<span class="bar" style="width:${(s.h/max*100).toFixed(1)}%"></span></td><td>${fmt(s.h)}</td><td>${s.mt}</td><td>${s.n}</td><td>${s.vn||""}</td><td>${s.ap||""}</td></tr>`).join("")}</tbody><tfoot><tr><td>Total ${y}</td><td>${fmt(T.h)}</td><td>${T.mt}</td><td>${T.n}</td><td>${T.vn}</td><td>${T.ap}</td></tr></tfoot></table>`;
+$("year").innerHTML=`<table><thead><tr><th>Mes</th><th>Horas</th><th>M/T</th><th>N</th><th>Vac</th><th>AP</th><th>Baja</th></tr></thead><tbody>${rows.map((s,m)=>`<tr class="${m===cm?"cur":""}"><td style="width:40%">${MES[m]}<span class="bar" style="width:${(s.h/max*100).toFixed(1)}%"></span></td><td>${fmt(s.h)}</td><td>${s.mt}</td><td>${s.n}</td><td>${s.vn||""}</td><td>${s.ap||""}</td><td>${s.bn||""}</td></tr>`).join("")}</tbody><tfoot><tr><td>Total ${y}</td><td>${fmt(T.h)}</td><td>${T.mt}</td><td>${T.n}</td><td>${T.vn}</td><td>${T.ap}</td><td>${T.bn}</td></tr></tfoot></table>`;
 const sel=$("ysel");sel.innerHTML="";for(let a=2026;a<=2040;a++){const o=document.createElement("option");o.value=a;o.textContent=a;if(a===y)o.selected=true;sel.appendChild(o)}
 }
 function renderChg(){
-const ks=Object.keys(P().ov).sort();
-$("chg").innerHTML=ks.length?`<ul class="chg">${ks.map(k=>{const t=parse(k),d=new Date(t);return`<li><b>${d.getUTCDate()} ${MES[d.getUTCMonth()]} ${d.getUTCFullYear()}</b>: ${esc(cell(t))} → ${esc(P().ov[k])}${P().notes[k]?" · "+esc(P().notes[k]):""}</li>`}).join("")}</ul>`:`<p class="note">Aún no has cambiado ningún día. Todo sigue la rotación.</p>`;
+const d=P(),ks=[...new Set([...Object.keys(d.ov),...Object.keys(d.lay)])].filter(k=>k.startsWith(cy+"-")).sort();
+$("chg").innerHTML=ks.length?`<ul class="chg">${ks.map(k=>{const t=parse(k),dd=new Date(t),parts=[];if(d.ov[k])parts.push(`${esc(cell(t))} → ${esc(d.ov[k])}`);if(d.lay[k])parts.push(`${LLAB[d.lay[k]]} sobre ${esc(shift(t))}`);return`<li><b>${dd.getUTCDate()} ${MES3[dd.getUTCMonth()]}</b>: ${parts.join(" · ")}</li>`}).join("")}</ul>`:`<p class="note">En ${cy} todo sigue la rotación, sin vacaciones ni permisos marcados.</p>`;
 }
 const SETS=[["h-M","Horas mañana (M)","hours.M"],["h-T","Horas tarde (T)","hours.T"],["h-N","Horas noche (N)","hours.N"],["vacDef","Vacaciones por defecto (días naturales)","vacDef"],["jor","Jornada anual manual (vacío = tabla)","jor"]];
 const getP=p=>p.split(".").reduce((o,k)=>o[k],S);
@@ -213,34 +259,51 @@ $("set").innerHTML=SETS.map(([id,l,p])=>`<div><label for="${id}">${l}</label><in
 let pubT=null,art=null;
 window.claude?.use?.("artifact")?.then(a=>{art=a}).catch(()=>{});
 function save(){S.ts=Date.now();try{localStorage.setItem("turnos-diego",JSON.stringify(S))}catch(e){}
-if(art){$("st").textContent="Guardando…";clearTimeout(pubT);pubT=setTimeout(publish,1500)}else $("st").textContent="Guardado en este dispositivo."}
+if(art){$("st").textContent="Guardando…";clearTimeout(pubT);pubT=setTimeout(publish,2500)}else $("st").textContent="Guardado en este dispositivo."}
 async function publish(){
 const json=JSON.stringify(S).replace(/</g,"\\u003c");
 const html=SRC.replace(/(<script id="estado" type="application\/json">)[\s\S]*?(<\/script>)/,(m,a,b)=>a+json+b);
 try{await art.publish(html);$("st").textContent="Guardado."}catch(e){$("st").textContent="Guardado en este dispositivo (no se pudo guardar en la nube)."}
 }
-let cur=null,pick=null;
-function openSheet(k){cur=k;const t=parse(k),d=new Date(t);pick=shift(t);
+let cur=null,pick=null,pickL="";
+function openSheet(k){cur=k;const t=parse(k),d=new Date(t);pick=shift(t);pickL=layer(t);
 $("sh").textContent=["lunes","martes","miércoles","jueves","viernes","sábado","domingo"][dow(t)]+" "+d.getUTCDate()+" de "+MES[d.getUTCMonth()];
-$("sinfo").textContent="Rotación: "+cell(t)+" (semana "+(rotWeek(t)+1)+" de 35)"+(base(t)==="N"?". Un AP aquí gasta 2.":"");
+$("sinfo").textContent="Rotación: "+cell(t)+" (semana "+(rotWeek(t)+1)+" de 35)";
 $("nota").value=P().notes[k]||"";drawOpts();$("sheet").classList.add("on");$("ok").focus()}
-function drawOpts(){const t=parse(cur);$("opts").innerHTML=CODES.map(([c,n])=>{let x=sh(c)?sh(c)+"h":(c==="B"||c==="O")?sh(base(t))+"h":c==="AP"?"×"+weight(t):"";return`<button class="opt c-${c==="-"?"D":c}${c===pick?" sel":""}" data-c="${esc(c)}"><b>${c==="-"?"–":c}</b><small>${n}${x?" · "+x:""}</small></button>`}).join("")}
+function drawOpts(){
+$("opts").innerHTML=SHIFTS.map(([c,n])=>`<button class="opt c-${c==="-"?"D":c}${c===pick?" sel":""}" data-c="${esc(c)}"><b>${c==="-"?"–":c}</b><small>${n}${sh(c)?" · "+sh(c)+"h":""}</small></button>`).join("");
+const w=pick==="N"?2:1;
+$("lays").innerHTML=LAYS.map(([c,n])=>`<button class="opt ${c?"c-"+(c==="AP"?"AP":c):""}${c===pickL?" sel":""}" data-l="${c}"><b>${c?LLAB[c]:"—"}</b><small>${n}${c==="AP"&&w===2?" ×2":c==="V"||c==="AP"?" · −"+sh(pick)+"h":""}</small></button>`).join("");
+}
 function close(){$("sheet").classList.remove("on");cur=null}
 $("opts").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;pick=b.dataset.c;drawOpts()});
-$("ok").addEventListener("click",()=>{if(!cur)return;const t=parse(cur);const nota=$("nota").value.trim();
-if(pick!==base(t))P().ov[cur]=pick;else delete P().ov[cur];if(nota)P().notes[cur]=nota;else delete P().notes[cur];
+$("lays").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;pickL=b.dataset.l;drawOpts()});
+$("ok").addEventListener("click",()=>{if(!cur)return;const t=parse(cur),d=P(),nota=$("nota").value.trim();
+if(pick!==base(t))d.ov[cur]=pick;else delete d.ov[cur];
+if(pickL)d.lay[cur]=pickL;else delete d.lay[cur];
+if(nota)d.notes[cur]=nota;else delete d.notes[cur];
 close();render();save()});
-$("reset").addEventListener("click",()=>{if(!cur)return;delete P().ov[cur];delete P().notes[cur];close();render();save()});
+$("reset").addEventListener("click",()=>{if(!cur)return;const d=P();delete d.ov[cur];delete d.lay[cur];close();render();save()});
 $("sheet").addEventListener("click",e=>{if(e.target.id==="sheet")close()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")close();if(!cur&&e.target.tagName!=="INPUT"&&e.target.tagName!=="SELECT"){if(e.key==="ArrowLeft")$("prev").click();if(e.key==="ArrowRight")$("next").click()}});
-$("cal").addEventListener("click",e=>{const b=e.target.closest(".d");if(b)openSheet(b.dataset.k)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")close();if(!cur&&!["INPUT","SELECT","TEXTAREA"].includes(e.target.tagName)){if(e.key==="ArrowLeft")$("prev").click();if(e.key==="ArrowRight")$("next").click()}});
+$("cal").addEventListener("click",e=>{const b=e.target.closest(".d");if(!b)return;const k=b.dataset.k;
+if(!mode){openSheet(k);return}
+const d=P();if(d.lay[k]===mode)delete d.lay[k];else d.lay[k]=mode;render();save()});
+$("notes").addEventListener("click",e=>{const b=e.target.closest(".lnk");if(b)openSheet(b.dataset.k)});
+$("mode").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;mode=b.dataset.m;for(const x of $("mode").children)x.classList.toggle("on",x===b);renderLive()});
 $("prev").addEventListener("click",()=>{cm--;if(cm<0){cm=11;cy--}render()});
 $("next").addEventListener("click",()=>{cm++;if(cm>11){cm=0;cy++}render()});
 $("ysel").addEventListener("change",e=>{cy=+e.target.value;render()});
 $("set").addEventListener("change",e=>{const id=e.target.id,v=e.target.value;const s=SETS.find(x=>x[0]===id);
-if(s)setP(s[2],id==="jor"?(v===""?"":Math.max(0,+v||0)):Math.max(0,+v||0));
-render();save()});
+if(s)setP(s[2],id==="jor"?(v===""?"":Math.max(0,+v||0)):Math.max(0,+v||0));render();save()});
 $("bal").addEventListener("change",e=>{if(e.target.id!=="vacy")return;const v=e.target.value;if(v==="")delete P().vacY[cy];else P().vacY[cy]=Math.max(0,Math.round(+v||0));render();save()});
+let armed="";
+$("bal").addEventListener("click",e=>{const id=e.target.id;if(id!=="clrV"&&id!=="clrA")return;const L=id==="clrV"?"V":"AP";
+if(armed!==id){armed=id;e.target.textContent="¿Seguro? Toca otra vez para quitarlas";return}
+armed="";const d=P();for(const k of Object.keys(d.lay))if(k.startsWith(cy+"-")&&d.lay[k]===L)delete d.lay[k];render();save()});
+$("bkc").addEventListener("click",async()=>{const t=JSON.stringify(S);$("bk").value=t;$("bk").select();
+try{await navigator.clipboard.writeText(t);$("bkm").textContent="Copiado. Guárdalo donde quieras."}catch(e){try{document.execCommand("copy");$("bkm").textContent="Copiado. Guárdalo donde quieras."}catch(e2){$("bkm").textContent="Selecciona el texto y cópialo a mano."}}});
+$("bkr").addEventListener("click",()=>{try{const x=JSON.parse($("bk").value);if(!x||typeof x!=="object"||!x.data&&!x.ov)throw 0;S=norm(x);render();renderSet();$("num").value=S.n;save();$("bkm").textContent="Datos restaurados."}catch(e){$("bkm").textContent="Ese texto no es una copia válida."}});
 {const ns=$("num");for(let i=1;i<=35;i++){const o=document.createElement("option");o.value=i;o.textContent="Nº "+i+(i===11?" (yo)":"");if(i===S.n)o.selected=true;ns.appendChild(o)}
 ns.addEventListener("change",()=>{S.n=+ns.value;render();save()})}
 renderSet();render();
