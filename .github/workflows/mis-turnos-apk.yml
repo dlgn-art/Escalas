@@ -1,0 +1,44 @@
+name: Mis turnos APK
+on:
+  push:
+    branches: [mis-turnos-apk]
+    paths: ['mis-turnos-android/**', '.github/workflows/mis-turnos-apk.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mis-turnos-android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Clave de firma (opcional)
+        env:
+          MT_KEYSTORE_B64: ${{ secrets.MT_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$MT_KEYSTORE_B64" ]; then echo "$MT_KEYSTORE_B64" | base64 -d > app/release.keystore; fi
+      - name: Compilar
+        env:
+          MT_KEY_PASS: ${{ secrets.MT_KEY_PASS }}
+        run: gradle assembleRelease --no-daemon
+      - name: Renombrar
+        run: cp app/build/outputs/apk/release/app-release.apk ../MisTurnos.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MisTurnos-apk
+          path: MisTurnos.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: mis-turnos-v${{ github.run_number }}
+          name: Mis turnos v${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          files: MisTurnos.apk

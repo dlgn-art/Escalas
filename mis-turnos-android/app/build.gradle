@@ -1,0 +1,27 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'com.diego.turnos'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.diego.turnos'
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+    signingConfigs {
+        propia {
+            storeFile file('release.keystore')
+            storePassword System.getenv('MT_KEY_PASS') ?: ''
+            keyAlias 'misturnos'
+            keyPassword System.getenv('MT_KEY_PASS') ?: ''
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig file('release.keystore').exists() ? signingConfigs.propia : signingConfigs.debug
+        }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
+}
