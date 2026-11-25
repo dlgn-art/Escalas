@@ -90,10 +90,17 @@ details.nt{background:var(--card);border-radius:12px;padding:10px 12px;margin:6p
 textarea{font:inherit;font-size:16px;width:100%;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;padding:8px 10px}
 .sub{font-size:13px;color:var(--mut);margin:12px 0 -6px;font-weight:600}
 .lnk{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;padding:8px 0;font-size:14px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:8;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--bg);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom))}
+.tabs button{height:48px;border:0;background:none;border-radius:12px;font-weight:700;font-size:15px;color:var(--mut);cursor:pointer}
+.tabs button.on{background:var(--ink);color:var(--bg)}
+main{padding-bottom:96px}
+.live{bottom:76px}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
 <main>
+<section class="tab" data-tab="turnos">
 <div class="top"><button class="nb" id="prev" aria-label="Mes anterior">‹</button><h1 id="mt">Mis turnos</h1><button class="nb" id="next" aria-label="Mes siguiente">›</button></div>
 <div class="who"><label for="num">Número en la lista</label><select id="num"></select></div>
 <div class="kpi" id="kpi"></div>
@@ -106,17 +113,23 @@ textarea{font:inherit;font-size:16px;width:100%;border-radius:10px;border:1px so
 <p class="note">Toca un día para cambiar el turno, ponerle vacaciones o baja encima, o escribir una nota. Con «Probar vacaciones» cada toque pone o quita vacaciones al momento y abajo ves cómo cambia el cómputo.</p>
 <div id="notes"></div>
 <div id="st"></div>
+</section>
 
-<h2 class="yr">Balance del año <select id="ysel" style="width:auto" aria-label="Año"></select></h2>
+<section class="tab" data-tab="computo" hidden>
+<h2 class="yr" style="margin-top:8px">Cómputo del año <select id="ysel" style="width:auto" aria-label="Año"></select></h2>
 <div id="bal"></div>
+</section>
 
-<h2>Horas por mes</h2>
+<section class="tab" data-tab="meses" hidden>
+<h2 class="yr" style="margin-top:8px">Horas por mes <select id="ysel2" style="width:auto" aria-label="Año"></select></h2>
 <div class="scroll" id="year"></div>
 
 <h2>Cambios, vacaciones y permisos</h2>
 <div id="chg"></div>
+</section>
 
-<h2>Ajustes</h2>
+<section class="tab" data-tab="ajustes" hidden>
+<h2 style="margin-top:8px">Ajustes</h2>
 <div class="set" id="set"></div>
 <p class="note">Ciclo: la tabla de 35 semanas de Enfermería Reanimación. Cada número de la lista va una semana por delante del anterior: el 30 de noviembre de 2026 el nº 11 está en la semana 22, el nº 12 en la 23, y así hasta volver a la 1. Cada número guarda sus propios cambios, notas y vacaciones.</p>
 <p class="note">Cómo se calcula: jornada del SERGAS según la tabla de noches (acuerdo de abril de 2023, aplicada en 2026). Turno de día fijo 1.533 h; rotatorio con noches 1.529 − 3 × noches; más de 63 noches, 1.340 h. A las horas de tu cuadrante se les resta esa jornada y las horas de los turnos que te tapan las vacaciones. Lo que sobra, en bloques de 7 h, son los AP que te tocan. Las vacaciones sobre turnos de más horas (noches, semanas cargadas) te dejan más AP. Un AP cogido en noche gasta 2. Baja y otros permisos cuentan las horas del turno que tapan. Si el SERGAS publica otra jornada para 2027, ponla en «Jornada anual manual».</p>
@@ -127,7 +140,9 @@ textarea{font:inherit;font-size:16px;width:100%;border-radius:10px;border:1px so
 <textarea id="bk" rows="4" aria-label="Datos de copia de seguridad" placeholder="Pulsa «Copiar mis datos» o pega aquí una copia"></textarea>
 <div class="row"><button class="btn" id="bkc">Copiar mis datos</button><button class="btn" id="bkr">Restaurar</button></div>
 <div class="note" id="bkm"></div>
+</section>
 </main>
+<nav class="tabs" id="tabs" aria-label="Secciones"><button data-t="turnos" class="on">Turnos</button><button data-t="computo">Cómputo</button><button data-t="meses">Meses</button><button data-t="ajustes">Ajustes</button></nav>
 
 <div class="sheet" id="sheet"><div class="panel" role="dialog" aria-modal="true" aria-labelledby="sh">
 <h3 id="sh"></h3><div class="note" id="sinfo"></div>
@@ -245,7 +260,7 @@ const y=cy;let max=1;const rows=[];
 for(let m=0;m<12;m++){const s=stats(y,m,m);rows.push(s);max=Math.max(max,s.h)}
 const T=stats(y,0,11);
 $("year").innerHTML=`<table><thead><tr><th>Mes</th><th>Horas</th><th>M/T</th><th>N</th><th>Vac</th><th>AP</th><th>Baja</th></tr></thead><tbody>${rows.map((s,m)=>`<tr class="${m===cm?"cur":""}"><td style="width:40%">${MES[m]}<span class="bar" style="width:${(s.h/max*100).toFixed(1)}%"></span></td><td>${fmt(s.h)}</td><td>${s.mt}</td><td>${s.n}</td><td>${s.vn||""}</td><td>${s.ap||""}</td><td>${s.bn||""}</td></tr>`).join("")}</tbody><tfoot><tr><td>Total ${y}</td><td>${fmt(T.h)}</td><td>${T.mt}</td><td>${T.n}</td><td>${T.vn}</td><td>${T.ap}</td><td>${T.bn}</td></tr></tfoot></table>`;
-const sel=$("ysel");sel.innerHTML="";for(let a=2026;a<=2040;a++){const o=document.createElement("option");o.value=a;o.textContent=a;if(a===y)o.selected=true;sel.appendChild(o)}
+for(const id of ["ysel","ysel2"]){const sel=$(id);sel.innerHTML="";for(let a=2026;a<=2040;a++){const o=document.createElement("option");o.value=a;o.textContent=a;if(a===y)o.selected=true;sel.appendChild(o)}}
 }
 function renderChg(){
 const d=P(),ks=[...new Set([...Object.keys(d.ov),...Object.keys(d.lay)])].filter(k=>k.startsWith(cy+"-")).sort();
@@ -295,6 +310,10 @@ $("mode").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)
 $("prev").addEventListener("click",()=>{cm--;if(cm<0){cm=11;cy--}render()});
 $("next").addEventListener("click",()=>{cm++;if(cm>11){cm=0;cy++}render()});
 $("ysel").addEventListener("change",e=>{cy=+e.target.value;render()});
+$("ysel2").addEventListener("change",e=>{cy=+e.target.value;render()});
+function showTab(t){for(const x of document.querySelectorAll(".tab"))x.hidden=x.dataset.tab!==t;for(const b of $("tabs").children)b.classList.toggle("on",b.dataset.t===t);try{sessionStorage.setItem("turnos-tab",t)}catch(e){}window.scrollTo(0,0)}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b)showTab(b.dataset.t)});
+try{const t=sessionStorage.getItem("turnos-tab");if(t&&t!=="turnos")showTab(t)}catch(e){}
 $("set").addEventListener("change",e=>{const id=e.target.id,v=e.target.value;const s=SETS.find(x=>x[0]===id);
 if(s)setP(s[2],id==="jor"?(v===""?"":Math.max(0,+v||0)):Math.max(0,+v||0));render();save()});
 $("bal").addEventListener("change",e=>{if(e.target.id!=="vacy")return;const v=e.target.value;if(v==="")delete P().vacY[cy];else P().vacY[cy]=Math.max(0,Math.round(+v||0));render();save()});
