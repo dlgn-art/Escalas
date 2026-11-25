@@ -153,7 +153,7 @@ details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 
 <section class="tab" data-tab="cartelera" hidden>
 <div class="cnav"><button class="nb" id="cprev" aria-label="Mes anterior">‹</button><h2 id="ct">Cartelera</h2><button class="nb" id="cnext" aria-label="Mes siguiente">›</button></div>
-<p class="note">Toca un día arriba para ver quién trabaja de mañana, tarde y noche. Toca un número (o una casilla) para desplegar sus turnos del mes y ponerle nombre. Tu fila va marcada. Los nombres solo se guardan en este móvil.</p>
+<p class="note">Toca un día arriba para ver quién trabaja de mañana, tarde y noche. Toca una casilla para ver ese día. Toca el número de la izquierda para desplegar sus turnos del mes y ponerle nombre. Tu fila va marcada. Los nombres solo se guardan en este móvil.</p>
 <div class="dayp" id="dayp"></div>
 <div id="nump"></div>
 <div class="cartw"><table class="cart" id="cart"></table></div>
@@ -218,7 +218,7 @@ const DOW=["L","M","X","J","V","S","D"];
 const DAY=86400000;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const DEF={v:4,ts:0,n:11,data:{},hours:{M:7,T:7,N:10},vacDef:30,jor:""};
+const DEF={v:4,ts:0,n:11,data:{},hours:{M:7,T:7,N:10},vacDef:30,jor:"",antig:0};
 let S;
 function norm(x){
 if(!x||typeof x!=="object")x={};
@@ -270,11 +270,12 @@ if(l==="V"){r.vn++;r.vH+=sh(c);if(habil(t))r.vh++}if(l==="AP"){r.ap+=weight(t);r
 const jornada=n=>{const j=parseFloat(S.jor);if(j>0)return j;return n===0?1533:n>63?1340:1529-3*n};
 const fmt=x=>(Math.round(x*10)/10).toLocaleString("es-ES");
 const sg=x=>(x>=0?"+":"−")+fmt(Math.abs(x));
+function extras(){const a=+S.antig||0,tr=Math.floor(a/3);return{vac:a>=30?4:a>=25?3:a>=20?2:a>=15?1:0,ld:tr>=8?tr-5:tr>=6?2:0,tr}}
 function calc(y){const r=stats(y,0,11),J=jornada(r.n),d=P();
-const vPlan=d.vacY[y]!=null?+d.vacY[y]:(+S.vacDef||0);
+const X=extras();const vPlan=d.vacY[y]!=null?+d.vacY[y]:(+S.vacDef||0)+X.vac;
 const avg=r.rot/r.days,vPend=Math.max(0,vPlan-r.vn),vPendH=vPend*avg;
-const after=r.h+r.apH-J-vPendH;const apTot=Math.max(0,Math.floor(after/7));
-return{r,J,vPlan,avg,vPend,vPendH,after,apTot,left:after-apTot*7,apRest:apTot-r.ap}}
+const after=r.h+r.apH-J-vPendH;const apH=Math.max(0,Math.floor(after/7));const apTot=apH+X.ld;
+return{r,J,vPlan,avg,vPend,vPendH,after,apH,apTot,X,left:after-apH*7,apRest:apTot-r.ap}}
 function render(){
 try{sessionStorage.setItem("turnos-mes",cy+"-"+cm)}catch(e){}
 $("mt").textContent=MES[cm]+" "+cy;
@@ -307,13 +308,14 @@ $("bal").innerHTML=`<div class="vin"><label for="vacy">Vacaciones que coges en $
 <div class="bal">
 <div class="box"><b>${fmt(r.rot)}</b><span>horas de tu cuadrante en ${y}</span></div>
 <div class="box"><b>${fmt(c.J)}</b><span>jornada SERGAS con ${r.n} noches${parseFloat(S.jor)>0?" (manual)":""}</span></div>
-<div class="box"><b>−${fmt(r.vH+c.vPendH)}</b><span>horas que tapan ${c.vPlan} días de vacaciones (${r.vn} marcados en el calendario)</span></div>
-<div class="box hi"><b>${c.apTot} AP</b><span>te tocan por cómputo (${fmt(c.after)} h ÷ 7)</span></div>
+<div class="box"><b>−${fmt(r.vH+c.vPendH)}</b><span>horas que tapan ${c.vPlan} días de vacaciones (${r.vn} marcado${r.vn===1?"":"s"} en el calendario)</span></div>
+<div class="box hi"><b>${c.apTot} AP</b><span>te tocan: ${c.apH} por cómputo (${fmt(c.after)} h ÷ 7)${c.X.ld?` + ${c.X.ld} por ${c.X.tr} trienios`:""}</span></div>
 <div class="box"><b>${r.ap} / ${c.apTot}</b><span>AP ya puestos (noche = 2)</span><div class="meter"><i style="width:${c.apTot?Math.min(100,r.ap/c.apTot*100):0}%"></i></div></div>
 <div class="box"><b>${sg(c.left)} h</b><span>te quedarías a final de año</span></div>
 </div>
 <p class="verdict">${c.after<0?`Con ${c.vPlan} días de vacaciones te faltarían <b>${fmt(-c.after)} h</b> para llegar a la jornada: no te toca ningún AP.`:`Con ${c.vPlan} días de vacaciones te tocan <b>${c.apTot} AP</b>${c.apRest>0?` (te quedan <b>${c.apRest}</b> por poner)`:c.apRest<0?` (has puesto <b>${-c.apRest}</b> de más)`:" y ya los has puesto todos"}, y te quedarías con <b>${sg(c.left)} h</b> de saldo.`}</p>
 <p class="note">${c.vPend?`Los ${c.vPend} días de vacaciones que aún no has marcado se estiman en ${fmt(c.avg)} h por día (media de tu cuadrante). Al marcarlos en el calendario se usan las horas exactas de los turnos que tapan: coger vacaciones sobre noches o semanas cargadas te deja más AP.`:`Todas las vacaciones están marcadas en el calendario: el cálculo usa las horas exactas.`}${r.bn?` Tienes ${r.bn} días de baja: cuentan las horas del turno que tapan.`:""}${r.db?` Llevas ${r.db} doblaje${r.db>1?"s":""} (+${fmt(r.dbH)} h), ya sumados.`:""}</p>
+<p class="note">Estatuto Marco (Ley 55/2003): vacaciones de al menos 30 días naturales al año (art. 53), o la parte proporcional si no trabajas el año entero, y solo se pagan en dinero si dejas el puesto. Los permisos y días de libre disposición los fija el SERGAS (art. 61): 6 días al año, ya incluidos en la jornada y por tanto en el cómputo, más 2 al cumplir el 6.º trienio y 1 más por trienio desde el 8.º. Por antigüedad hay 1 día extra de vacaciones a los 15 años, 2 a los 20, 3 a los 25 y 4 a los 30.${c.X.vac||c.X.ld?` Con ${S.antig} años te suman ${c.X.vac} día${c.X.vac===1?"":"s"} de vacaciones y ${c.X.ld} AP.`:` Pon tus años de servicio en Ajustes para sumarlos.`}</p>
 <button class="lnk" id="clrV">Quitar todas las vacaciones de ${y}</button> · <button class="lnk" id="clrA">Quitar todos los AP de ${y}</button>`;
 }
 function renderYear(){
@@ -371,10 +373,11 @@ renderNum();
 function renderNames(){S.names=S.names||{};$("names").innerHTML=Array.from({length:35},(_,i)=>i+1).map(n=>`<div><label for="nm-${n}">Nº ${n}${n===S.n?" (tú)":""}</label><input id="nm-${n}" data-n="${n}" maxlength="30" value="${esc(S.names[n]||"")}"></div>`).join("")}
 $("names").addEventListener("change",e=>{const n=e.target.dataset.n;if(!n)return;S.names=S.names||{};const v=e.target.value.trim();if(v)S.names[n]=v;else delete S.names[n];render();save()});
 $("cart").addEventListener("click",e=>{const th=e.target.closest("th[data-d]");if(th){selDay=+th.dataset.d;renderCart();return}
-const tr=e.target.closest("tbody tr");if(!tr)return;const n=+tr.dataset.n;const td=e.target.closest("td");if(td&&td.dataset.d)selDay=+td.dataset.d;selNum=n;renderCart();$("nump").scrollIntoView({behavior:"smooth",block:"nearest"})});
+const td=e.target.closest("td[data-d]");if(td){selDay=+td.dataset.d;renderCart();return}
+const who=e.target.closest("tbody th.who");if(!who)return;selNum=+who.closest("tr").dataset.n;renderCart();$("nump").scrollIntoView({behavior:"smooth",block:"nearest"})});
 $("cprev").addEventListener("click",()=>{cm--;if(cm<0){cm=11;cy--}selDay=null;render()});
 $("cnext").addEventListener("click",()=>{cm++;if(cm>11){cm=0;cy++}selDay=null;render()});
-const SETS=[["h-M","Horas mañana (M)","hours.M"],["h-T","Horas tarde (T)","hours.T"],["h-N","Horas noche (N)","hours.N"],["vacDef","Vacaciones por defecto (días naturales)","vacDef"],["jor","Jornada anual manual (vacío = tabla)","jor"]];
+const SETS=[["h-M","Horas mañana (M)","hours.M"],["h-T","Horas tarde (T)","hours.T"],["h-N","Horas noche (N)","hours.N"],["vacDef","Vacaciones base (días naturales)","vacDef"],["antig","Años de servicio (para días extra)","antig"],["jor","Jornada anual manual (vacío = tabla)","jor"]];
 const getP=p=>p.split(".").reduce((o,k)=>o[k],S);
 const setP=(p,v)=>{const a=p.split(".");let o=S;while(a.length>1)o=o[a.shift()];o[a[0]]=v};
 function renderSet(){
@@ -400,7 +403,12 @@ const w=pick==="N"?2:1;
 $("dbls").innerHTML=["M","T","N"].map(c=>`<button class="opt ${pickD.includes(c)?"c-"+c+" sel":""}" data-d="${c}"><b>+${c}</b><small>${pickD.includes(c)?"Quitar":"Añadir"} · ${sh(c)}h</small></button>`).join("");
 {const t=parse(cur),parts=[];const mine=[];if("MTN".includes(pick)&&pick!=="L"&&pickL!=="V"&&pickL!=="AP"&&pickL!=="B"&&pickL!=="O")mine.push(pick);for(const x of pickD)if(!mine.includes(x))mine.push(x);
 const NAMES={M:"Mañana",T:"Tarde",N:"Noche"};
-$("crew").innerHTML=mine.length?"<div class='sub' style='margin:0 0 6px'>Con quién te toca</div>"+mine.map(c=>{const l=crew(t,c);return`<div><b>${NAMES[c]}:</b> ${l.length?esc(l.join(", ")):"nadie más de la lista"}</div>`}).join(""):"<span class='note'>Este día no trabajas.</span>"}
+const HR={M:[8,15],T:[15,22],N:[22,32]};let warn="";
+{const sp=[...mine].sort((a,b)=>HR[a][0]-HR[b][0]);let run=0,maxr=0,endp=null;for(const c of sp){const[a,b]=HR[c];run=(endp===a)?run+(b-a):(b-a);endp=b;maxr=Math.max(maxr,run)}
+if(maxr>12)warn=`<div style="color:#d6293e;font-weight:700;margin-bottom:6px">Ojo: ${maxr} h seguidas. El Estatuto Marco pone un máximo de 12 h ininterrumpidas (art. 51), salvo excepciones del servicio.</div>`;
+const prev=parse(cur)-DAY,ps=[shift(prev),...dbl(prev)].filter(x=>"MTN".includes(x)&&x.length===1&&!(off(prev)&&x===shift(prev)));const first=sp[0];
+if(first&&ps.length){const lastEnd=Math.max(...ps.map(x=>HR[x][1]))-24;const rest=HR[first][0]-lastEnd;if(rest<12)warn+=`<div style="color:#d6293e;font-weight:700;margin-bottom:6px">Ojo: solo ${rest} h de descanso desde el turno del día anterior. El mínimo son 12 h (art. 51), salvo excepciones.</div>`}}
+$("crew").innerHTML=warn+(mine.length?"<div class='sub' style='margin:0 0 6px'>Con quién te toca</div>"+mine.map(c=>{const l=crew(t,c);return`<div><b>${NAMES[c]}:</b> ${l.length?esc(l.join(", ")):"nadie más de la lista"}</div>`}).join(""):"<span class='note'>Este día no trabajas.</span>")}
 $("lays").innerHTML=LAYS.map(([c,n])=>`<button class="opt ${c?"c-"+(c==="AP"?"AP":c):""}${c===pickL?" sel":""}" data-l="${c}"><b>${c?LLAB[c]:"—"}</b><small>${n}${c==="AP"&&w===2?" ×2":c==="V"||c==="AP"?" · −"+sh(pick)+"h":""}</small></button>`).join("");
 }
 function close(){$("sheet").classList.remove("on");cur=null}
