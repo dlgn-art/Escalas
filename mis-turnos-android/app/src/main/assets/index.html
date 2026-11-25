@@ -64,7 +64,7 @@ input,select{width:100%;height:44px;border-radius:10px;border:1px solid var(--li
 .chg li{margin:4px 0}
 .sheet{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;justify-content:center;z-index:9}
 .sheet.on{display:flex}
-.panel{background:var(--bg);width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:20px 18px 28px}
+.panel{background:var(--bg);width:100%;max-width:520px;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:20px 18px 28px}
 .panel h3{margin:0 0 4px;font-size:22px}.panel h3::first-letter{text-transform:uppercase}
 .opts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:14px 0}
 .opt{height:64px;border-radius:12px;border:1px solid var(--line);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
@@ -90,12 +90,28 @@ details.nt{background:var(--card);border-radius:12px;padding:10px 12px;margin:6p
 textarea{font:inherit;font-size:16px;width:100%;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;padding:8px 10px}
 .sub{font-size:13px;color:var(--mut);margin:12px 0 -6px;font-weight:600}
 .lnk{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;padding:8px 0;font-size:14px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:8;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--bg);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom))}
-.tabs button{height:48px;border:0;background:none;border-radius:12px;font-weight:700;font-size:15px;color:var(--mut);cursor:pointer}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:8;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--bg);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom))}
+.tabs button{height:48px;border:0;background:none;border-radius:12px;font-weight:700;font-size:13px;color:var(--mut);cursor:pointer}
 .tabs button.on{background:var(--ink);color:var(--bg)}
 main{padding-bottom:96px}
 .live{bottom:76px}
 [hidden]{display:none!important}
+.d .db{position:absolute;left:3px;bottom:2px;font-size:10px;font-weight:800;background:var(--ink);color:var(--bg);border-radius:5px;padding:0 3px;line-height:14px;z-index:1}
+.crew{background:var(--card);border-radius:12px;padding:10px 12px;margin:12px 0 4px;font-size:14px}.crew b{display:inline-block;min-width:64px}
+.cartw{overflow-x:auto;margin:8px -4px;border:1px solid var(--line);border-radius:12px}
+table.cart{border-collapse:separate;border-spacing:0;font-size:12px;width:auto}
+table.cart th,table.cart td{padding:0;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+table.cart td{width:28px;min-width:28px;height:26px;font-weight:700}
+table.cart thead th{position:sticky;top:0;background:var(--bg);z-index:2;font-size:11px;padding:4px 0;cursor:pointer;min-width:28px}
+table.cart thead th.sel{background:var(--ink);color:var(--bg)}
+table.cart th.who{position:sticky;left:0;background:var(--bg);z-index:3;text-align:left;padding:0 8px;max-width:110px;overflow:hidden;text-overflow:ellipsis;font-weight:600;border-right:1px solid var(--line)}
+table.cart tr.me th.who,table.cart tr.me td{box-shadow:inset 0 2px 0 var(--ink),inset 0 -2px 0 var(--ink)}
+table.cart td.sel{outline:2px solid var(--ink);outline-offset:-2px}
+table.cart tfoot td,table.cart tfoot th{font-size:11px;color:var(--mut);font-weight:700;height:22px}
+.dayp{display:grid;gap:8px;margin:10px 0}.dayp div{background:var(--card);border-radius:12px;padding:10px 12px;font-size:15px}.dayp b{display:block;font-size:13px;color:var(--mut);margin-bottom:2px}
+.cnav{display:flex;align-items:center;gap:8px}.cnav h2{flex:1;margin:8px 0;text-transform:capitalize}
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}
+details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 </style>
 </head>
 <body>
@@ -113,6 +129,13 @@ main{padding-bottom:96px}
 <p class="note">Toca un día para cambiar el turno, ponerle vacaciones o baja encima, o escribir una nota. Con «Probar vacaciones» cada toque pone o quita vacaciones al momento y abajo ves cómo cambia el cómputo.</p>
 <div id="notes"></div>
 <div id="st"></div>
+</section>
+
+<section class="tab" data-tab="cartelera" hidden>
+<div class="cnav"><button class="nb" id="cprev" aria-label="Mes anterior">‹</button><h2 id="ct">Cartelera</h2><button class="nb" id="cnext" aria-label="Mes siguiente">›</button></div>
+<p class="note">Toca un día arriba para ver quién trabaja de mañana, tarde y noche. Tu fila va marcada. Los nombres los pones en Ajustes y solo se guardan en este móvil.</p>
+<div class="dayp" id="dayp"></div>
+<div class="cartw"><table class="cart" id="cart"></table></div>
 </section>
 
 <section class="tab" data-tab="computo" hidden>
@@ -135,6 +158,7 @@ main{padding-bottom:96px}
 <p class="note">Cómo se calcula: jornada del SERGAS según la tabla de noches (acuerdo de abril de 2023, aplicada en 2026). Turno de día fijo 1.533 h; rotatorio con noches 1.529 − 3 × noches; más de 63 noches, 1.340 h. A las horas de tu cuadrante se les resta esa jornada y las horas de los turnos que te tapan las vacaciones. Lo que sobra, en bloques de 7 h, son los AP que te tocan. Las vacaciones sobre turnos de más horas (noches, semanas cargadas) te dejan más AP. Un AP cogido en noche gasta 2. Baja y otros permisos cuentan las horas del turno que tapan. Si el SERGAS publica otra jornada para 2027, ponla en «Jornada anual manual».</p>
 <p class="note">Fuentes: <a href="https://sanidad.ccoo.es/70832b1b6cd74e3a435f349112978476000058.pdf">tabla de noches SERGAS (CCOO)</a> · <a href="https://www.cig-saude.gal/permisos-e-licenzas.html">permisos y licencias (CIG Saúde)</a> · <a href="https://www.cig-saude.gal/nova/c%C3%B3mputo-de-xornada.html">cómputo de jornada (CIG Saúde)</a></p>
 
+<details class="nm"><summary>Nombres de los compañeros (opcional)</summary><p class="note">Escribe el nombre de cada número de la lista. Se guardan solo en este móvil y salen en la cartelera y en «Con quién te toca».</p><div class="names" id="names"></div></details>
 <h2>Copia de seguridad</h2>
 <p class="note">Antes de actualizar o reinstalar la app, copia tus datos y guárdalos (por ejemplo en una nota o en WhatsApp contigo mismo). Después pégalos aquí y pulsa Restaurar.</p>
 <textarea id="bk" rows="4" aria-label="Datos de copia de seguridad" placeholder="Pulsa «Copiar mis datos» o pega aquí una copia"></textarea>
@@ -142,7 +166,7 @@ main{padding-bottom:96px}
 <div class="note" id="bkm"></div>
 </section>
 </main>
-<nav class="tabs" id="tabs" aria-label="Secciones"><button data-t="turnos" class="on">Turnos</button><button data-t="computo">Cómputo</button><button data-t="meses">Meses</button><button data-t="ajustes">Ajustes</button></nav>
+<nav class="tabs" id="tabs" aria-label="Secciones"><button data-t="turnos" class="on">Turnos</button><button data-t="cartelera">Cartelera</button><button data-t="computo">Cómputo</button><button data-t="meses">Meses</button><button data-t="ajustes">Ajustes</button></nav>
 
 <div class="sheet" id="sheet"><div class="panel" role="dialog" aria-modal="true" aria-labelledby="sh">
 <h3 id="sh"></h3><div class="note" id="sinfo"></div>
@@ -150,6 +174,9 @@ main{padding-bottom:96px}
 <div class="opts" id="opts"></div>
 <div class="sub">Encima del turno</div>
 <div class="opts" id="lays"></div>
+<div class="sub">Doblaje (turno extra a mayores)</div>
+<div class="opts" id="dbls"></div>
+<div class="crew" id="crew"></div>
 <label for="nota">Nota del día</label><textarea id="nota" rows="3" maxlength="600" placeholder="Ej.: cambio con Pilar, curso, médico…"></textarea>
 <div class="row"><button class="btn" id="reset">Volver a rotación</button><button class="btn p" id="ok">Hecho</button></div>
 </div></div>
@@ -178,7 +205,7 @@ x.n=Math.min(35,Math.max(1,+x.n||11));return x}
 try{S=JSON.parse($("estado").textContent)}catch(e){S={}}
 try{const l=JSON.parse(localStorage.getItem("turnos-diego")||"null");if(l&&l.ts>(S.ts||0))S=l}catch(e){}
 S=norm(S);
-const P=()=>{const d=S.data[S.n]||(S.data[S.n]={});d.ov=d.ov||{};d.notes=d.notes||{};d.vacY=d.vacY||{};
+const P=()=>{const d=S.data[S.n]||(S.data[S.n]={});d.ov=d.ov||{};d.notes=d.notes||{};d.vacY=d.vacY||{};d.dbl=d.dbl||{};
 if(!d.lay){d.lay={};for(const k in d.ov){const c=d.ov[k];if(["V","B","AP","O","E"].includes(c)){d.lay[k]=c==="E"?"AP":c;delete d.ov[k]}}}return d};
 const key=t=>new Date(t).toISOString().slice(0,10);
 const utc=(y,m,d)=>Date.UTC(y,m,d);
@@ -191,10 +218,20 @@ const base=t=>cell(t)[0]==="-"?"-":cell(t)[0];
 const grp=t=>cell(t).slice(1);
 const shift=t=>P().ov[key(t)]||base(t);
 const layer=t=>P().lay[key(t)]||"";
+const dbl=t=>P().dbl[key(t)]||[];
+const rwN=(n,t)=>{const w=Math.floor((t-REF)/DAY/7);return(((n+10+w)%35)+35)%35};
+const cellN=(n,t)=>ROT[rwN(n,t)][dow(t)];
+const DN=n=>S.data[n]||{};
+const shiftN=(n,t)=>(DN(n).ov&&DN(n).ov[key(t)])||cellN(n,t)[0];
+const layN=(n,t)=>(DN(n).lay&&DN(n).lay[key(t)])||"";
+const dblN=(n,t)=>(DN(n).dbl&&DN(n).dbl[key(t)])||[];
+const nm=n=>(S.names&&S.names[n]&&String(S.names[n]).trim())||("Nº "+n);
+function crew(t,c){const out=[];for(let n=1;n<=35;n++){if(n===S.n)continue;const l=layN(n,t);const on=(shiftN(n,t)===c&&l!=="V"&&l!=="AP"&&l!=="B"&&l!=="O")||dblN(n,t).includes(c);if(on){const ce=cellN(n,t);out.push(nm(n)+(ce[0]===c&&ce.length>1?" ("+ce+")":dblN(n,t).includes(c)?" (doblaje)":""))}}return out}
 const sh=c=>"MTN".includes(c)&&c.length===1?(+S.hours[c]||0):0;
 const off=t=>{const l=layer(t);return l==="V"||l==="AP"};
-const hoursAt=t=>off(t)?0:sh(shift(t));
+const hoursAt=t=>(off(t)?0:sh(shift(t)))+dbl(t).reduce((a,c)=>a+sh(c),0);
 const isNight=t=>shift(t)==="N"&&!off(t);
+const nNights=t=>(isNight(t)?1:0)+dbl(t).filter(c=>c==="N").length;
 const weight=t=>shift(t)==="N"?2:1;
 function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=(h+l-7*m+114)%31+1;return utc(y,mo-1,da)}
 function fest(t){const d=new Date(t),m=d.getUTCMonth()+1,dd=d.getUTCDate(),y=d.getUTCFullYear();const f=["1-1","1-6","5-1","5-17","7-25","8-15","10-12","11-1","12-6","12-8","12-25"];const e=easter(y);return f.includes(m+"-"+dd)||t===e-2*DAY||t===e-3*DAY}
@@ -203,9 +240,9 @@ const now=new Date();const TODAY=utc(now.getFullYear(),now.getMonth(),now.getDat
 let cy,cm,mode="";
 try{const s=sessionStorage.getItem("turnos-mes");if(s){[cy,cm]=s.split("-").map(Number)}}catch(e){}
 if(cy==null){cy=now.getFullYear()<2027?2027:now.getFullYear();cm=now.getFullYear()<2027?0:now.getMonth()}
-function stats(y,m0,m1){const r={h:0,mt:0,n:0,vn:0,vh:0,ap:0,apH:0,vH:0,bn:0,nn:0,rot:0,days:0};
+function stats(y,m0,m1){const r={h:0,mt:0,n:0,vn:0,vh:0,ap:0,apH:0,vH:0,bn:0,nn:0,db:0,dbH:0,rot:0,days:0};
 for(let m=m0;m<=m1;m++){const days=new Date(Date.UTC(y,m+1,0)).getUTCDate();for(let d=1;d<=days;d++){const t=utc(y,m,d),c=shift(t),l=layer(t);r.h+=hoursAt(t);r.rot+=sh(c);r.days++;
-if((c==="M"||c==="T")&&!off(t))r.mt++;if(isNight(t))r.n++;
+if((c==="M"||c==="T")&&!off(t))r.mt++;r.n+=nNights(t);for(const x of dbl(t)){r.db++;r.dbH+=sh(x);if(x!=="N")r.mt++}
 if(l==="V"){r.vn++;r.vH+=sh(c);if(habil(t))r.vh++}if(l==="AP"){r.ap+=weight(t);r.apH+=sh(c)}if(l==="B")r.bn++;if(P().notes[key(t)])r.nn++}}return r}
 const jornada=n=>{const j=parseFloat(S.jor);if(j>0)return j;return n===0?1533:n>63?1340:1529-3*n};
 const fmt=x=>(Math.round(x*10)/10).toLocaleString("es-ES");
@@ -219,17 +256,17 @@ function render(){
 try{sessionStorage.setItem("turnos-mes",cy+"-"+cm)}catch(e){}
 $("mt").textContent=MES[cm]+" "+cy;
 const st=stats(cy,cm,cm);
-$("kpi").innerHTML=`<div><span class="big">${fmt(st.h)}</span> <span>horas en ${MES[cm]}</span></div><span><b>${st.mt}</b> M/T · <b>${st.n}</b> noches${st.vn?` · <b>${st.vn}</b> vac.`:""}${st.ap?` · <b>${st.ap}</b> AP`:""}${st.bn?` · <b>${st.bn}</b> baja`:""}${st.nn?` · <b style="color:#e11d48">${st.nn}</b> notas`:""}</span>`;
+$("kpi").innerHTML=`<div><span class="big">${fmt(st.h)}</span> <span>horas en ${MES[cm]}</span></div><span><b>${st.mt}</b> M/T · <b>${st.n}</b> noches${st.vn?` · <b>${st.vn}</b> vac.`:""}${st.ap?` · <b>${st.ap}</b> AP`:""}${st.bn?` · <b>${st.bn}</b> baja`:""}${st.db?` · <b>${st.db}</b> doblaje${st.db>1?"s":""}`:""}${st.nn?` · <b style="color:#e11d48">${st.nn}</b> notas`:""}</span>`;
 const first=utc(cy,cm,1);let t=first-dow(first)*DAY;const last=utc(cy,cm+1,0);
 let h=DOW.map(d=>`<div class="dh">${d}</div>`).join("")+`<div class="dh">h</div>`;
 while(t<=last){let wh=0;const w=rotWeek(t)+1;
 for(let i=0;i<7;i++,t+=DAY){const c=shift(t),l=layer(t),k=key(t),d=new Date(t);wh+=hoursAt(t);
 const cls=["d","c-"+(c==="-"?"D":c)];if(d.getUTCMonth()!==cm)cls.push("out");if(t===TODAY)cls.push("today");if(P().ov[k])cls.push("ch");if(fest(t))cls.push("fe");if(P().notes[k])cls.push("hn");if(l)cls.push("lay");
 const g=!l&&"MTN".includes(c)&&c===base(t)?grp(t):"";
-h+=`<button class="${cls.join(" ")}" data-k="${k}" aria-label="${d.getUTCDate()} ${MES[d.getUTCMonth()]}: ${c}${g}${l?", "+LLAB[l]:""}${P().notes[k]?", con nota":""}"><span class="n">${d.getUTCDate()}</span><span class="s">${c==="-"?"–":c}</span>${g?`<span class="g">${g}</span>`:""}${l?`<span class="ly ly-${l}">${LLAB[l]}</span>`:""}</button>`}
+h+=`<button class="${cls.join(" ")}" data-k="${k}" aria-label="${d.getUTCDate()} ${MES[d.getUTCMonth()]}: ${c}${g}${l?", "+LLAB[l]:""}${P().notes[k]?", con nota":""}"><span class="n">${d.getUTCDate()}</span><span class="s">${c==="-"?"–":c}</span>${g?`<span class="g">${g}</span>`:""}${l?`<span class="ly ly-${l}">${LLAB[l]}</span>`:""}${dbl(t).length?`<span class="db">+${dbl(t).join("")}</span>`:""}</button>`}
 h+=`<div class="wk"><b>${fmt(wh)}</b>sem ${w}</div>`}
 $("cal").innerHTML=h;
-renderNotes();renderLive();renderBal();renderYear();renderChg();
+renderNotes();renderLive();renderBal();renderYear();renderChg();renderCart();
 }
 function renderNotes(){
 const ks=Object.keys(P().notes).filter(k=>{const d=new Date(parse(k));return d.getUTCFullYear()===cy&&d.getUTCMonth()===cm}).sort();
@@ -252,7 +289,7 @@ $("bal").innerHTML=`<div class="vin"><label for="vacy">Vacaciones que coges en $
 <div class="box"><b>${sg(c.left)} h</b><span>te quedarías a final de año</span></div>
 </div>
 <p class="verdict">${c.after<0?`Con ${c.vPlan} días de vacaciones te faltarían <b>${fmt(-c.after)} h</b> para llegar a la jornada: no te toca ningún AP.`:`Con ${c.vPlan} días de vacaciones te tocan <b>${c.apTot} AP</b>${c.apRest>0?` (te quedan <b>${c.apRest}</b> por poner)`:c.apRest<0?` (has puesto <b>${-c.apRest}</b> de más)`:" y ya los has puesto todos"}, y te quedarías con <b>${sg(c.left)} h</b> de saldo.`}</p>
-<p class="note">${c.vPend?`Los ${c.vPend} días de vacaciones que aún no has marcado se estiman en ${fmt(c.avg)} h por día (media de tu cuadrante). Al marcarlos en el calendario se usan las horas exactas de los turnos que tapan: coger vacaciones sobre noches o semanas cargadas te deja más AP.`:`Todas las vacaciones están marcadas en el calendario: el cálculo usa las horas exactas.`}${r.bn?` Tienes ${r.bn} días de baja: cuentan las horas del turno que tapan.`:""}</p>
+<p class="note">${c.vPend?`Los ${c.vPend} días de vacaciones que aún no has marcado se estiman en ${fmt(c.avg)} h por día (media de tu cuadrante). Al marcarlos en el calendario se usan las horas exactas de los turnos que tapan: coger vacaciones sobre noches o semanas cargadas te deja más AP.`:`Todas las vacaciones están marcadas en el calendario: el cálculo usa las horas exactas.`}${r.bn?` Tienes ${r.bn} días de baja: cuentan las horas del turno que tapan.`:""}${r.db?` Llevas ${r.db} doblaje${r.db>1?"s":""} (+${fmt(r.dbH)} h), ya sumados.`:""}</p>
 <button class="lnk" id="clrV">Quitar todas las vacaciones de ${y}</button> · <button class="lnk" id="clrA">Quitar todos los AP de ${y}</button>`;
 }
 function renderYear(){
@@ -263,9 +300,35 @@ $("year").innerHTML=`<table><thead><tr><th>Mes</th><th>Horas</th><th>M/T</th><th
 for(const id of ["ysel","ysel2"]){const sel=$(id);sel.innerHTML="";for(let a=2026;a<=2040;a++){const o=document.createElement("option");o.value=a;o.textContent=a;if(a===y)o.selected=true;sel.appendChild(o)}}
 }
 function renderChg(){
-const d=P(),ks=[...new Set([...Object.keys(d.ov),...Object.keys(d.lay)])].filter(k=>k.startsWith(cy+"-")).sort();
-$("chg").innerHTML=ks.length?`<ul class="chg">${ks.map(k=>{const t=parse(k),dd=new Date(t),parts=[];if(d.ov[k])parts.push(`${esc(cell(t))} → ${esc(d.ov[k])}`);if(d.lay[k])parts.push(`${LLAB[d.lay[k]]} sobre ${esc(shift(t))}`);return`<li><b>${dd.getUTCDate()} ${MES3[dd.getUTCMonth()]}</b>: ${parts.join(" · ")}</li>`}).join("")}</ul>`:`<p class="note">En ${cy} todo sigue la rotación, sin vacaciones ni permisos marcados.</p>`;
+const d=P(),ks=[...new Set([...Object.keys(d.ov),...Object.keys(d.lay),...Object.keys(d.dbl)])].filter(k=>k.startsWith(cy+"-")).sort();
+$("chg").innerHTML=ks.length?`<ul class="chg">${ks.map(k=>{const t=parse(k),dd=new Date(t),parts=[];if(d.ov[k])parts.push(`${esc(cell(t))} → ${esc(d.ov[k])}`);if(d.lay[k])parts.push(`${LLAB[d.lay[k]]} sobre ${esc(shift(t))}`);if(d.dbl[k]&&d.dbl[k].length)parts.push(`doblaje +${esc(d.dbl[k].join(", "))}`);return`<li><b>${dd.getUTCDate()} ${MES3[dd.getUTCMonth()]}</b>: ${parts.join(" · ")}</li>`}).join("")}</ul>`:`<p class="note">En ${cy} todo sigue la rotación, sin vacaciones ni permisos marcados.</p>`;
 }
+let selDay=null;
+function renderCart(){
+const days=new Date(Date.UTC(cy,cm+1,0)).getUTCDate();
+if(!selDay||selDay>days){const td=new Date(TODAY);selDay=(td.getUTCFullYear()===cy&&td.getUTCMonth()===cm)?td.getUTCDate():1}
+$("ct").textContent="Cartelera "+MES[cm]+" "+cy;
+const t0=utc(cy,cm,selDay),NAMES={M:"Mañana",T:"Tarde",N:"Noche"};
+const who=c=>{const l=[];for(let n=1;n<=35;n++){const lay=layN(n,t0);const on=(shiftN(n,t0)===c&&lay!=="V"&&lay!=="AP"&&lay!=="B"&&lay!=="O")||dblN(n,t0).includes(c);if(on){const ce=cellN(n,t0);l.push((n===S.n?"<b style='display:inline'>":"")+esc(nm(n))+(ce[0]===c&&ce.length>1?" <small>("+esc(ce)+")</small>":"")+(n===S.n?" (tú)</b>":""))}}return l};
+$("dayp").innerHTML=`<div style="background:none;padding:0"><b style="font-size:15px;color:inherit">${["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"][dow(t0)]} ${selDay} de ${MES[cm]}</b></div>`+["M","T","N"].map(c=>{const l=who(c);return`<div><b>${NAMES[c]} · ${l.length}</b>${l.length?l.join(", "):"nadie"}</div>`}).join("");
+let h="<thead><tr><th class='who'>Nº</th>";
+for(let d=1;d<=days;d++){const t=utc(cy,cm,d);h+=`<th data-d="${d}" class="${d===selDay?"sel":""}" style="${fest(t)||dow(t)>4?"color:#d6293e":""}">${d}<br>${DOW[dow(t)]}</th>`}
+h+="</tr></thead><tbody>";
+const cnt={M:Array(days+1).fill(0),T:Array(days+1).fill(0),N:Array(days+1).fill(0)};
+for(let n=1;n<=35;n++){h+=`<tr class="${n===S.n?"me":""}"><th class="who" title="${esc(nm(n))}">${n}${S.names&&S.names[n]?" "+esc(S.names[n]):""}</th>`;
+for(let d=1;d<=days;d++){const t=utc(cy,cm,d),c=shiftN(n,t),l=layN(n,t),db=dblN(n,t);
+if(!(l==="V"||l==="AP"||l==="B"||l==="O")&&cnt[c])cnt[c][d]++;for(const x of db)cnt[x][d]++;
+const show=l?LLAB[l][0]:c==="-"?"–":c;const cls=l?"ly-"+l:"c-"+(c==="-"?"D":c);
+h+=`<td class="${cls}${d===selDay?" sel":""}">${show}${db.length?"+":""}</td>`}
+h+="</tr>"}
+h+="</tbody><tfoot>"+["M","T","N"].map(c=>`<tr><th class="who">${c}</th>${cnt[c].slice(1).map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")+"</tfoot>";
+$("cart").innerHTML=h;
+}
+function renderNames(){S.names=S.names||{};$("names").innerHTML=Array.from({length:35},(_,i)=>i+1).map(n=>`<div><label for="nm-${n}">Nº ${n}${n===S.n?" (tú)":""}</label><input id="nm-${n}" data-n="${n}" maxlength="30" value="${esc(S.names[n]||"")}"></div>`).join("")}
+$("names").addEventListener("change",e=>{const n=e.target.dataset.n;if(!n)return;S.names=S.names||{};const v=e.target.value.trim();if(v)S.names[n]=v;else delete S.names[n];render();save()});
+$("cart").addEventListener("click",e=>{const th=e.target.closest("th[data-d]");if(!th)return;selDay=+th.dataset.d;renderCart()});
+$("cprev").addEventListener("click",()=>{cm--;if(cm<0){cm=11;cy--}selDay=null;render()});
+$("cnext").addEventListener("click",()=>{cm++;if(cm>11){cm=0;cy++}selDay=null;render()});
 const SETS=[["h-M","Horas mañana (M)","hours.M"],["h-T","Horas tarde (T)","hours.T"],["h-N","Horas noche (N)","hours.N"],["vacDef","Vacaciones por defecto (días naturales)","vacDef"],["jor","Jornada anual manual (vacío = tabla)","jor"]];
 const getP=p=>p.split(".").reduce((o,k)=>o[k],S);
 const setP=(p,v)=>{const a=p.split(".");let o=S;while(a.length>1)o=o[a.shift()];o[a[0]]=v};
@@ -281,25 +344,31 @@ const json=JSON.stringify(S).replace(/</g,"\\u003c");
 const html=SRC.replace(/(<script id="estado" type="application\/json">)[\s\S]*?(<\/script>)/,(m,a,b)=>a+json+b);
 try{await art.publish(html);$("st").textContent="Guardado."}catch(e){$("st").textContent="Guardado en este dispositivo (no se pudo guardar en la nube)."}
 }
-let cur=null,pick=null,pickL="";
-function openSheet(k){cur=k;const t=parse(k),d=new Date(t);pick=shift(t);pickL=layer(t);
+let cur=null,pick=null,pickL="",pickD=[];
+function openSheet(k){cur=k;const t=parse(k),d=new Date(t);pick=shift(t);pickL=layer(t);pickD=[...dbl(t)];
 $("sh").textContent=["lunes","martes","miércoles","jueves","viernes","sábado","domingo"][dow(t)]+" "+d.getUTCDate()+" de "+MES[d.getUTCMonth()];
 $("sinfo").textContent="Rotación: "+cell(t)+" (semana "+(rotWeek(t)+1)+" de 35)";
 $("nota").value=P().notes[k]||"";drawOpts();$("sheet").classList.add("on");$("ok").focus()}
 function drawOpts(){
 $("opts").innerHTML=SHIFTS.map(([c,n])=>`<button class="opt c-${c==="-"?"D":c}${c===pick?" sel":""}" data-c="${esc(c)}"><b>${c==="-"?"–":c}</b><small>${n}${sh(c)?" · "+sh(c)+"h":""}</small></button>`).join("");
 const w=pick==="N"?2:1;
+$("dbls").innerHTML=["M","T","N"].map(c=>`<button class="opt ${pickD.includes(c)?"c-"+c+" sel":""}" data-d="${c}"><b>+${c}</b><small>${pickD.includes(c)?"Quitar":"Añadir"} · ${sh(c)}h</small></button>`).join("");
+{const t=parse(cur),parts=[];const mine=[];if("MTN".includes(pick)&&pick!=="L"&&pickL!=="V"&&pickL!=="AP"&&pickL!=="B"&&pickL!=="O")mine.push(pick);for(const x of pickD)if(!mine.includes(x))mine.push(x);
+const NAMES={M:"Mañana",T:"Tarde",N:"Noche"};
+$("crew").innerHTML=mine.length?"<div class='sub' style='margin:0 0 6px'>Con quién te toca</div>"+mine.map(c=>{const l=crew(t,c);return`<div><b>${NAMES[c]}:</b> ${l.length?esc(l.join(", ")):"nadie más de la lista"}</div>`}).join(""):"<span class='note'>Este día no trabajas.</span>"}
 $("lays").innerHTML=LAYS.map(([c,n])=>`<button class="opt ${c?"c-"+(c==="AP"?"AP":c):""}${c===pickL?" sel":""}" data-l="${c}"><b>${c?LLAB[c]:"—"}</b><small>${n}${c==="AP"&&w===2?" ×2":c==="V"||c==="AP"?" · −"+sh(pick)+"h":""}</small></button>`).join("");
 }
 function close(){$("sheet").classList.remove("on");cur=null}
 $("opts").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;pick=b.dataset.c;drawOpts()});
+$("dbls").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;const c=b.dataset.d;pickD=pickD.includes(c)?pickD.filter(x=>x!==c):[...pickD,c].sort((a,b)=>"MTN".indexOf(a)-"MTN".indexOf(b));drawOpts()});
 $("lays").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;pickL=b.dataset.l;drawOpts()});
 $("ok").addEventListener("click",()=>{if(!cur)return;const t=parse(cur),d=P(),nota=$("nota").value.trim();
 if(pick!==base(t))d.ov[cur]=pick;else delete d.ov[cur];
 if(pickL)d.lay[cur]=pickL;else delete d.lay[cur];
+if(pickD.length)d.dbl[cur]=pickD;else delete d.dbl[cur];
 if(nota)d.notes[cur]=nota;else delete d.notes[cur];
 close();render();save()});
-$("reset").addEventListener("click",()=>{if(!cur)return;const d=P();delete d.ov[cur];delete d.lay[cur];close();render();save()});
+$("reset").addEventListener("click",()=>{if(!cur)return;const d=P();delete d.ov[cur];delete d.lay[cur];delete d.dbl[cur];close();render();save()});
 $("sheet").addEventListener("click",e=>{if(e.target.id==="sheet")close()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")close();if(!cur&&!["INPUT","SELECT","TEXTAREA"].includes(e.target.tagName)){if(e.key==="ArrowLeft")$("prev").click();if(e.key==="ArrowRight")$("next").click()}});
 $("cal").addEventListener("click",e=>{const b=e.target.closest(".d");if(!b)return;const k=b.dataset.k;
@@ -323,10 +392,10 @@ if(armed!==id){armed=id;e.target.textContent="¿Seguro? Toca otra vez para quita
 armed="";const d=P();for(const k of Object.keys(d.lay))if(k.startsWith(cy+"-")&&d.lay[k]===L)delete d.lay[k];render();save()});
 $("bkc").addEventListener("click",async()=>{const t=JSON.stringify(S);$("bk").value=t;$("bk").select();
 try{await navigator.clipboard.writeText(t);$("bkm").textContent="Copiado. Guárdalo donde quieras."}catch(e){try{document.execCommand("copy");$("bkm").textContent="Copiado. Guárdalo donde quieras."}catch(e2){$("bkm").textContent="Selecciona el texto y cópialo a mano."}}});
-$("bkr").addEventListener("click",()=>{try{const x=JSON.parse($("bk").value);if(!x||typeof x!=="object"||!x.data&&!x.ov)throw 0;S=norm(x);render();renderSet();$("num").value=S.n;save();$("bkm").textContent="Datos restaurados."}catch(e){$("bkm").textContent="Ese texto no es una copia válida."}});
+$("bkr").addEventListener("click",()=>{try{const x=JSON.parse($("bk").value);if(!x||typeof x!=="object"||!x.data&&!x.ov)throw 0;S=norm(x);render();renderSet();renderNames();$("num").value=S.n;save();$("bkm").textContent="Datos restaurados."}catch(e){$("bkm").textContent="Ese texto no es una copia válida."}});
 {const ns=$("num");for(let i=1;i<=35;i++){const o=document.createElement("option");o.value=i;o.textContent="Nº "+i+(i===11?" (yo)":"");if(i===S.n)o.selected=true;ns.appendChild(o)}
 ns.addEventListener("change",()=>{S.n=+ns.value;render();save()})}
-renderSet();render();
+renderSet();renderNames();render();
 }
 </script>
 </body>
