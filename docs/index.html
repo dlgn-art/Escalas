@@ -37,11 +37,11 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 .big{font-size:clamp(40px,11vw,56px);font-weight:800;line-height:1}
 .kpi span{color:var(--mut)}
 .kpi b{color:var(--ink)}
-.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr)) 46px;gap:4px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr)) 40px;gap:4px}
 .dh{font-size:13px;color:var(--mut);text-align:center;padding-bottom:2px}
-.d{aspect-ratio:1/1.1;border-radius:10px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;padding:0;background:var(--L);color:var(--Li)}
+.d{aspect-ratio:1/1.38;border-radius:10px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;padding:0;background:var(--L);color:var(--Li)}
 .d .n{font-size:13px;position:absolute;top:3px;left:6px;opacity:.85}
-.d .s{font-size:clamp(18px,5vw,24px);font-weight:800}
+.d .s{font-size:clamp(22px,7vw,32px);font-weight:800;line-height:1}
 .d.out{opacity:.35}
 .d.today{box-shadow:0 0 0 3px var(--ink)}
 
@@ -83,7 +83,7 @@ input,select{width:100%;height:44px;border-radius:10px;border:1px solid var(--li
 .btn.p{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 #st{font-size:13px;color:var(--mut);min-height:20px;margin-top:6px}
 @media(prefers-reduced-motion:no-preference){.panel{animation:up .18s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.4}}}
-@media(max-width:420px){.cal{grid-template-columns:repeat(7,minmax(0,1fr)) 36px;gap:3px}.d{border-radius:8px}.d .n{font-size:11px;left:4px}}
+@media(max-width:420px){main{padding-left:8px;padding-right:8px}.cal{grid-template-columns:repeat(7,minmax(0,1fr)) 30px;gap:3px}.d{border-radius:8px}.d .n{font-size:11px;left:4px}.wk{font-size:10px}.wk b{font-size:14px}}
 .d.ch{outline:2px dashed currentColor;outline-offset:-4px}
 .d.hn::before{content:"✎";position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#e11d48;color:#fff;font-size:13px;line-height:22px;text-align:center;font-weight:800;border:2px solid var(--bg);box-shadow:0 2px 6px #0005;z-index:2}
 .d.hn{border:2px solid #e11d48}
@@ -104,6 +104,26 @@ textarea{font:inherit;font-size:16px;width:100%;border-radius:10px;border:1px so
 main{padding-bottom:96px}
 .live{bottom:76px}
 [hidden]{display:none!important}
+.d.split{background:none;overflow:hidden}
+.d .hf{position:absolute;left:0;right:0;height:50%;display:flex;align-items:center;justify-content:center}
+.d .hf.top{top:0}.d .hf.bot{bottom:0;border-top:2px solid var(--bg)}
+.d.split .s{font-size:clamp(16px,5vw,24px)}
+.d .n{z-index:2}
+.pals{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:8px 0 14px}
+.pal{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px;cursor:pointer;text-align:left;font-weight:700;font-size:14px}
+.pal.on{box-shadow:0 0 0 3px var(--ink)}
+.pal i{display:inline-block;width:22px;height:22px;border-radius:6px;margin:6px 4px 0 0;font-style:normal;font-size:11px;text-align:center;line-height:22px;font-weight:800}
+.nump{background:var(--card);border-radius:14px;padding:12px;margin:10px 0}
+.nump .hd{display:flex;gap:8px;align-items:end}.nump .hd div{flex:1}
+.mini{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-top:10px}
+.mini span{border-radius:7px;text-align:center;font-weight:800;font-size:15px;padding:3px 0;border:1px solid var(--line);line-height:1.1}
+.mini span small{display:block;font-size:10px;font-weight:600;opacity:.8}
+table.cart th.who{cursor:pointer}
+:root[data-pal=pastel]{--M:#ffe7a0;--Mi:#4a3b00;--T:#ffc7ad;--Ti:#4a1a00;--N:#b8c2ff;--Ni:#101a5c;--V:#bde8d1;--Vi:#0b3d24;--B:#f5b8cd;--Bi:#5a0b2a;--A:#b4e5e9;--Ai:#063a3f;--O:#d3d8e0;--Oi:#2b3340}
+:root[data-pal=contraste]{--M:#ffcc00;--Mi:#000;--T:#ff5a00;--Ti:#000;--N:#0019a8;--Ni:#fff;--V:#008a3e;--Vi:#fff;--B:#b0003a;--Bi:#fff;--A:#007c89;--Ai:#fff;--O:#444;--Oi:#fff}
+:root[data-pal=mar]{--M:#9bd8ff;--Mi:#00253d;--T:#2a8fe0;--Ti:#fff;--N:#0b2a5b;--Ni:#fff;--V:#7ed6a5;--Vi:#003018;--B:#e86a92;--Bi:#fff;--A:#36c5c5;--Ai:#002b2b;--O:#8a94a6;--Oi:#fff}
+:root[data-pal=otono]{--M:#f2c14e;--Mi:#3a2a00;--T:#d1603d;--Ti:#fff;--N:#5b3a70;--Ni:#fff;--V:#8bb174;--Vi:#1a2d0d;--B:#a23b5c;--Bi:#fff;--A:#3f9c8f;--Ai:#fff;--O:#7d7068;--Oi:#fff}
+:root[data-pal=gris]{--M:#e6e6e6;--Mi:#111;--T:#9e9e9e;--Ti:#000;--N:#2b2b2b;--Ni:#fff;--V:#6fbf8e;--Vi:#002a14;--B:#d06a8a;--Bi:#fff;--A:#5fb3bd;--Ai:#002b2f;--O:#777;--Oi:#fff}
 .d .db{position:absolute;left:3px;bottom:2px;font-size:10px;font-weight:800;background:var(--ink);color:var(--bg);border-radius:5px;padding:0 3px;line-height:14px;z-index:1}
 .crew{background:var(--card);border-radius:12px;padding:10px 12px;margin:12px 0 4px;font-size:14px}.crew b{display:inline-block;min-width:64px}
 .cartw{overflow-x:auto;margin:8px -4px;border:1px solid var(--line);border-radius:12px}
@@ -141,8 +161,9 @@ details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 
 <section class="tab" data-tab="cartelera" hidden>
 <div class="cnav"><button class="nb" id="cprev" aria-label="Mes anterior">‹</button><h2 id="ct">Cartelera</h2><button class="nb" id="cnext" aria-label="Mes siguiente">›</button></div>
-<p class="note">Toca un día arriba para ver quién trabaja de mañana, tarde y noche. Tu fila va marcada. Los nombres los pones en Ajustes y solo se guardan en este móvil.</p>
+<p class="note">Toca un día arriba para ver quién trabaja de mañana, tarde y noche. Toca un número (o una casilla) para desplegar sus turnos del mes y ponerle nombre. Tu fila va marcada. Los nombres solo se guardan en este móvil.</p>
 <div class="dayp" id="dayp"></div>
+<div id="nump"></div>
 <div class="cartw"><table class="cart" id="cart"></table></div>
 </section>
 
@@ -161,6 +182,8 @@ details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 
 <section class="tab" data-tab="ajustes" hidden>
 <h2 style="margin-top:8px">Ajustes</h2>
+<div class="sub" style="margin:0">Colores de los turnos</div>
+<div class="pals" id="pals"></div>
 <div class="set" id="set"></div>
 <p class="note">Ciclo: la tabla de 35 semanas de Enfermería Reanimación. Cada número de la lista va una semana por delante del anterior: el 30 de noviembre de 2026 el nº 11 está en la semana 22, el nº 12 en la 23, y así hasta volver a la 1. Cada número guarda sus propios cambios, notas y vacaciones.</p>
 <p class="note">Cómo se calcula: jornada del SERGAS según la tabla de noches (acuerdo de abril de 2023, aplicada en 2026). Turno de día fijo 1.533 h; rotatorio con noches 1.529 − 3 × noches; más de 63 noches, 1.340 h. A las horas de tu cuadrante se les resta esa jornada y las horas de los turnos que te tapan las vacaciones. Lo que sobra, en bloques de 7 h, son los AP que te tocan. Las vacaciones sobre turnos de más horas (noches, semanas cargadas) te dejan más AP. Un AP cogido en noche gasta 2. Baja y otros permisos cuentan las horas del turno que tapan. Si el SERGAS publica otra jornada para 2027, ponla en «Jornada anual manual».</p>
@@ -271,7 +294,8 @@ while(t<=last){let wh=0;const w=rotWeek(t)+1;
 for(let i=0;i<7;i++,t+=DAY){const c=shift(t),l=layer(t),k=key(t),d=new Date(t);wh+=hoursAt(t);
 const cls=["d","c-"+(c==="-"?"D":c)];if(d.getUTCMonth()!==cm)cls.push("out");if(t===TODAY)cls.push("today");if(P().ov[k])cls.push("ch");if(fest(t))cls.push("fe");if(P().notes[k])cls.push("hn");if(l)cls.push("lay");
 const g=!l&&"MTN".includes(c)&&c===base(t)?grp(t):"";
-h+=`<button class="${cls.join(" ")}" data-k="${k}" aria-label="${d.getUTCDate()} ${MES[d.getUTCMonth()]}: ${c}${g}${l?", "+LLAB[l]:""}${P().notes[k]?", con nota":""}"><span class="n">${d.getUTCDate()}</span><span class="s">${c==="-"?"–":c}</span>${g?`<span class="g">${g}</span>`:""}${l?`<span class="ly ly-${l}">${LLAB[l]}</span>`:""}${dbl(t).length?`<span class="db">+${dbl(t).join("")}</span>`:""}</button>`}
+const dd=dbl(t);if(dd.length&&!l){cls[1]="split"}
+h+=`<button class="${cls.join(" ")}" data-k="${k}" aria-label="${d.getUTCDate()} ${MES[d.getUTCMonth()]}: ${c}${g}${l?", "+LLAB[l]:""}${P().notes[k]?", con nota":""}"><span class="n">${d.getUTCDate()}</span>${dd.length&&!l?`<span class="hf top c-${c==="-"?"D":c}"><span class="s">${c==="-"?"–":c}</span></span><span class="hf bot c-${dd[0]}"><span class="s">+${dd.join("")}</span></span>`:`<span class="s">${c==="-"?"–":c}</span>${g?`<span class="g">${g}</span>`:""}`}${l?`<span class="ly ly-${l}">${LLAB[l]}</span>`:""}${dd.length&&l?`<span class="db">+${dd.join("")}</span>`:""}</button>`}
 h+=`<div class="wk"><b>${fmt(wh)}</b>sem ${w}</div>`}
 $("cal").innerHTML=h;
 renderNotes();renderLive();renderBal();renderYear();renderChg();renderCart();
@@ -311,7 +335,26 @@ function renderChg(){
 const d=P(),ks=[...new Set([...Object.keys(d.ov),...Object.keys(d.lay),...Object.keys(d.dbl)])].filter(k=>k.startsWith(cy+"-")).sort();
 $("chg").innerHTML=ks.length?`<ul class="chg">${ks.map(k=>{const t=parse(k),dd=new Date(t),parts=[];if(d.ov[k])parts.push(`${esc(cell(t))} → ${esc(d.ov[k])}`);if(d.lay[k])parts.push(`${LLAB[d.lay[k]]} sobre ${esc(shift(t))}`);if(d.dbl[k]&&d.dbl[k].length)parts.push(`doblaje +${esc(d.dbl[k].join(", "))}`);return`<li><b>${dd.getUTCDate()} ${MES3[dd.getUTCMonth()]}</b>: ${parts.join(" · ")}</li>`}).join("")}</ul>`:`<p class="note">En ${cy} todo sigue la rotación, sin vacaciones ni permisos marcados.</p>`;
 }
-let selDay=null;
+let selDay=null,selNum=null;
+const PALS=[["","Clásico"],["pastel","Pastel"],["contraste","Alto contraste"],["mar","Mar"],["otono","Otoño"],["gris","Grises"]];
+function applyPal(){if(S.pal)document.documentElement.dataset.pal=S.pal;else delete document.documentElement.dataset.pal}
+function renderPals(){$("pals").innerHTML=PALS.map(([k,n])=>`<button class="pal${(S.pal||"")===k?" on":""}" data-p="${k}" style="${k?"":""}">${n}<br><span data-pal-prev="${k}">${["M","T","N"].map(c=>`<i class="c-${c}">${c}</i>`).join("")}</span></button>`).join("");
+for(const b of $("pals").querySelectorAll(".pal")){const k=b.dataset.p;const PV={"":["#ffd23f","#2b2300","#ff7a45","#2a0e00","#3b4cca","#fff"],pastel:["#ffe7a0","#4a3b00","#ffc7ad","#4a1a00","#b8c2ff","#101a5c"],contraste:["#ffcc00","#000","#ff5a00","#000","#0019a8","#fff"],mar:["#9bd8ff","#00253d","#2a8fe0","#fff","#0b2a5b","#fff"],otono:["#f2c14e","#3a2a00","#d1603d","#fff","#5b3a70","#fff"],gris:["#e6e6e6","#111","#9e9e9e","#000","#2b2b2b","#fff"]}[k];
+b.querySelectorAll("i").forEach((x,i)=>{x.style.background=PV[i*2];x.style.color=PV[i*2+1]})}}
+$("pals").addEventListener("click",e=>{const b=e.target.closest(".pal");if(!b)return;S.pal=b.dataset.p;applyPal();renderPals();save()});
+function renderNum(){
+const el=$("nump");if(!selNum){el.innerHTML="";return}
+const n=selNum,days=new Date(Date.UTC(cy,cm+1,0)).getUTCDate(),f=utc(cy,cm,1);let hrs=0,cells="";
+for(let i=0;i<dow(f);i++)cells+="<span style='border:0'></span>";
+for(let d=1;d<=days;d++){const t=utc(cy,cm,d),c=shiftN(n,t),l=layN(n,t),db=dblN(n,t),ce=cellN(n,t);
+if(!(l==="V"||l==="AP"))hrs+=sh(c);for(const x of db)hrs+=sh(x);
+cells+=`<span class="${l?"ly-"+l:"c-"+(c==="-"?"D":c)}"><small>${d}</small>${l?LLAB[l]:c==="-"?"–":c}${db.length?"+"+db.join(""):""}${!l&&ce[0]===c&&ce.length>1?`<small>${esc(ce.slice(1))}</small>`:""}</span>`}
+el.innerHTML=`<div class="nump"><div class="hd"><div><label for="cnm">Nombre del Nº ${n}${n===S.n?" (tú)":""}</label><input id="cnm" data-n="${n}" maxlength="30" placeholder="Nº ${n}" value="${esc((S.names||{})[n]||"")}"></div><button class="nb" id="cnx" aria-label="Cerrar">×</button></div>
+<div class="note" style="margin-top:6px">${MES[cm]} ${cy}: ${fmt(hrs)} h</div>
+<div class="mini">${DOW.map(x=>`<span style="border:0;font-size:11px;color:var(--mut)">${x}</span>`).join("")}${cells}</div></div>`;
+}
+$("nump").addEventListener("change",e=>{if(e.target.id!=="cnm")return;const n=e.target.dataset.n;S.names=S.names||{};const v=e.target.value.trim();if(v)S.names[n]=v;else delete S.names[n];renderNames();render();save()});
+$("nump").addEventListener("click",e=>{if(e.target.id==="cnx"){selNum=null;renderNum()}});
 function renderCart(){
 const days=new Date(Date.UTC(cy,cm+1,0)).getUTCDate();
 if(!selDay||selDay>days){const td=new Date(TODAY);selDay=(td.getUTCFullYear()===cy&&td.getUTCMonth()===cm)?td.getUTCDate():1}
@@ -323,18 +366,20 @@ let h="<thead><tr><th class='who'>Nº</th>";
 for(let d=1;d<=days;d++){const t=utc(cy,cm,d);h+=`<th data-d="${d}" class="${d===selDay?"sel":""}" style="${fest(t)||dow(t)>4?"color:#d6293e":""}">${d}<br>${DOW[dow(t)]}</th>`}
 h+="</tr></thead><tbody>";
 const cnt={M:Array(days+1).fill(0),T:Array(days+1).fill(0),N:Array(days+1).fill(0)};
-for(let n=1;n<=35;n++){h+=`<tr class="${n===S.n?"me":""}"><th class="who" title="${esc(nm(n))}">${n}${S.names&&S.names[n]?" "+esc(S.names[n]):""}</th>`;
+for(let n=1;n<=35;n++){h+=`<tr data-n="${n}" class="${n===S.n?"me":""}"><th class="who" title="${esc(nm(n))}">${n}${S.names&&S.names[n]?" "+esc(S.names[n]):""}</th>`;
 for(let d=1;d<=days;d++){const t=utc(cy,cm,d),c=shiftN(n,t),l=layN(n,t),db=dblN(n,t);
 if(!(l==="V"||l==="AP"||l==="B"||l==="O")&&cnt[c])cnt[c][d]++;for(const x of db)cnt[x][d]++;
 const show=l?LLAB[l][0]:c==="-"?"–":c;const cls=l?"ly-"+l:"c-"+(c==="-"?"D":c);
-h+=`<td class="${cls}${d===selDay?" sel":""}">${show}${db.length?"+":""}</td>`}
+h+=`<td data-d="${d}" class="${cls}${d===selDay?" sel":""}">${show}${db.length?"+":""}</td>`}
 h+="</tr>"}
 h+="</tbody><tfoot>"+["M","T","N"].map(c=>`<tr><th class="who">${c}</th>${cnt[c].slice(1).map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")+"</tfoot>";
 $("cart").innerHTML=h;
+renderNum();
 }
 function renderNames(){S.names=S.names||{};$("names").innerHTML=Array.from({length:35},(_,i)=>i+1).map(n=>`<div><label for="nm-${n}">Nº ${n}${n===S.n?" (tú)":""}</label><input id="nm-${n}" data-n="${n}" maxlength="30" value="${esc(S.names[n]||"")}"></div>`).join("")}
 $("names").addEventListener("change",e=>{const n=e.target.dataset.n;if(!n)return;S.names=S.names||{};const v=e.target.value.trim();if(v)S.names[n]=v;else delete S.names[n];render();save()});
-$("cart").addEventListener("click",e=>{const th=e.target.closest("th[data-d]");if(!th)return;selDay=+th.dataset.d;renderCart()});
+$("cart").addEventListener("click",e=>{const th=e.target.closest("th[data-d]");if(th){selDay=+th.dataset.d;renderCart();return}
+const tr=e.target.closest("tbody tr");if(!tr)return;const n=+tr.dataset.n;const td=e.target.closest("td");if(td&&td.dataset.d)selDay=+td.dataset.d;selNum=n;renderCart();$("nump").scrollIntoView({behavior:"smooth",block:"nearest"})});
 $("cprev").addEventListener("click",()=>{cm--;if(cm<0){cm=11;cy--}selDay=null;render()});
 $("cnext").addEventListener("click",()=>{cm++;if(cm>11){cm=0;cy++}selDay=null;render()});
 const SETS=[["h-M","Horas mañana (M)","hours.M"],["h-T","Horas tarde (T)","hours.T"],["h-N","Horas noche (N)","hours.N"],["vacDef","Vacaciones por defecto (días naturales)","vacDef"],["jor","Jornada anual manual (vacío = tabla)","jor"]];
@@ -400,10 +445,10 @@ if(armed!==id){armed=id;e.target.textContent="¿Seguro? Toca otra vez para quita
 armed="";const d=P();for(const k of Object.keys(d.lay))if(k.startsWith(cy+"-")&&d.lay[k]===L)delete d.lay[k];render();save()});
 $("bkc").addEventListener("click",async()=>{const t=JSON.stringify(S);$("bk").value=t;$("bk").select();
 try{await navigator.clipboard.writeText(t);$("bkm").textContent="Copiado. Guárdalo donde quieras."}catch(e){try{document.execCommand("copy");$("bkm").textContent="Copiado. Guárdalo donde quieras."}catch(e2){$("bkm").textContent="Selecciona el texto y cópialo a mano."}}});
-$("bkr").addEventListener("click",()=>{try{const x=JSON.parse($("bk").value);if(!x||typeof x!=="object"||!x.data&&!x.ov)throw 0;S=norm(x);render();renderSet();renderNames();$("num").value=S.n;save();$("bkm").textContent="Datos restaurados."}catch(e){$("bkm").textContent="Ese texto no es una copia válida."}});
+$("bkr").addEventListener("click",()=>{try{const x=JSON.parse($("bk").value);if(!x||typeof x!=="object"||!x.data&&!x.ov)throw 0;S=norm(x);applyPal();renderPals();render();renderSet();renderNames();$("num").value=S.n;save();$("bkm").textContent="Datos restaurados."}catch(e){$("bkm").textContent="Ese texto no es una copia válida."}});
 {const ns=$("num");for(let i=1;i<=35;i++){const o=document.createElement("option");o.value=i;o.textContent="Nº "+i+(i===11?" (yo)":"");if(i===S.n)o.selected=true;ns.appendChild(o)}
 ns.addEventListener("change",()=>{S.n=+ns.value;render();save()})}
-renderSet();renderNames();render();
+applyPal();renderPals();renderSet();renderNames();render();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 }
 </script>
