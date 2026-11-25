@@ -89,7 +89,9 @@ input,select{width:100%;height:44px;border-radius:10px;border:1px solid var(--li
 .d.hn{border:2px solid #e11d48}
 .d .ly{position:absolute;left:0;right:0;bottom:0;height:30%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.02em;border-radius:0 0 9px 9px}
 .d.lay .s{opacity:.45;margin-top:-22%}
-.ly-V{background:var(--V);color:var(--Vi)}.ly-B{background:var(--B);color:var(--Bi)}.ly-AP{background:var(--A);color:var(--Ai)}.ly-O{background:var(--O);color:var(--Oi)}
+.ly-V{background:var(--V);color:var(--Vi)}.ly-B{background:var(--B);color:var(--Bi)}.ly-AP{background:var(--A);color:var(--Ai)}.ly-O{background:var(--O);color:var(--Oi)}.ly-AT{background:#7a1020;color:#fff}.ly-NA{background:#7b4bc4;color:#fff}.ly-SS{background:repeating-linear-gradient(45deg,#6b7280 0 4px,#9ca3af 4px 8px);color:#fff}
+.c-AT{background:#7a1020;color:#fff;border-color:transparent}.c-NA{background:#7b4bc4;color:#fff;border-color:transparent}.c-SS{background:repeating-linear-gradient(45deg,#6b7280 0 6px,#9ca3af 6px 12px);color:#fff;border-color:transparent}
+#lays{grid-template-columns:repeat(4,minmax(0,1fr))}
 .mode{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}.mode button{height:40px;padding:0 12px;border-radius:20px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:14px;font-weight:600}
 .mode button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .live{position:sticky;bottom:8px;z-index:5;background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 14px;margin:10px 0;display:none;font-size:15px;line-height:1.35;box-shadow:0 6px 20px #0004}
@@ -187,6 +189,7 @@ details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 <div class="set" id="set"></div>
 <p class="note">Ciclo: la tabla de 35 semanas de Enfermería Reanimación. Cada número de la lista va una semana por delante del anterior: el 30 de noviembre de 2026 el nº 11 está en la semana 22, el nº 12 en la 23, y así hasta volver a la 1. Cada número guarda sus propios cambios, notas y vacaciones.</p>
 <p class="note">Cómo se calcula: jornada del SERGAS según la tabla de noches (acuerdo de abril de 2023, aplicada en 2026). Turno de día fijo 1.533 h; rotatorio con noches 1.529 − 3 × noches; más de 63 noches, 1.340 h. A las horas de tu cuadrante se les resta esa jornada y las horas de los turnos que te tapan las vacaciones. Lo que sobra, en bloques de 7 h, son los AP que te tocan. Las vacaciones sobre turnos de más horas (noches, semanas cargadas) te dejan más AP. Un AP cogido en noche gasta 2. Baja y otros permisos cuentan las horas del turno que tapan. Si el SERGAS publica otra jornada para 2027, ponla en «Jornada anual manual».</p>
+<p class="note">Bajas y permisos: la baja por enfermedad común (IT), el accidente laboral o enfermedad profesional, el permiso por nacimiento (maternidad o paternidad) y los permisos retribuidos (matrimonio, fallecimiento, exámenes, formación, lactancia…) cuentan como tiempo trabajado: suman las horas del turno que tapan. Los días sin sueldo (licencia no retribuida) no suman horas, pero la jornada baja en proporción (jornada × (329 − días) ÷ 329). Las vacaciones y los AP no suman horas porque ya están descontados de la jornada.</p>
 <p class="note">Fuentes: <a href="https://sanidad.ccoo.es/70832b1b6cd74e3a435f349112978476000058.pdf">tabla de noches SERGAS (CCOO)</a> · <a href="https://www.cig-saude.gal/permisos-e-licenzas.html">permisos y licencias (CIG Saúde)</a> · <a href="https://www.cig-saude.gal/nova/c%C3%B3mputo-de-xornada.html">cómputo de jornada (CIG Saúde)</a></p>
 
 <details class="nm"><summary>Nombres de los compañeros (opcional)</summary><p class="note">Escribe el nombre de cada número de la lista. Se guardan solo en este móvil y salen en la cartelera y en «Con quién te toca».</p><div class="names" id="names"></div></details>
@@ -201,13 +204,13 @@ details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 
 <div class="sheet" id="sheet"><div class="panel" role="dialog" aria-modal="true" aria-labelledby="sh">
 <h3 id="sh"></h3><div class="note" id="sinfo"></div>
+<div class="crew" id="crew"></div>
 <div class="sub">Turno</div>
 <div class="opts" id="opts"></div>
 <div class="sub">Encima del turno</div>
 <div class="opts" id="lays"></div>
 <div class="sub">Doblaje (turno extra a mayores)</div>
 <div class="opts" id="dbls"></div>
-<div class="crew" id="crew"></div>
 <label for="nota">Nota del día</label><textarea id="nota" rows="3" maxlength="600" placeholder="Ej.: cambio con Pilar, curso, médico…"></textarea>
 <div class="row"><button class="btn" id="reset">Volver a rotación</button><button class="btn p" id="ok">Hecho</button></div>
 </div></div>
@@ -218,8 +221,9 @@ details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 const SRC='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
 const ROT=`M1 T1 N1 - L M2 T2|N2 - L L T3 N3 -|L M6 T6 N6 - L L|T2 N2 - L L T1 N1|- L M5 T5 N5 - M5|L M4 T4 N4 - L L|N1 - L M3 M3 L L|M6 T6 N6 - L M4 T4|N4 - L L T2 N2 -|L M5 T5 N5 - L L|T1 N1 - L L T3 N3|- L L T4 N4 - M4|M5 L L M5 T5 N5 -|L L M1 M1 M1 L L|M4 T4 N4 - L M3 T3|N3 - L L T6 N6 -|L M2 T2 N2 - L L|T6 N6 - L M5 T5 N5|- L L T1 N1 - M1|L L M3 T3 N3 - M3|L L M6 M6 M6 L L|M2 T2 N2 - L M5 T5|N5 - L L T1 N1 -|L M3 T3 N3 - L L|T4 N4 - L L T2 N2|- L L T6 N6 - M6|L T5 N5 - L M1 T1|L L M2 M2 M2 L L|M3 T3 N3 - L M6 T6|N6 - L L T4 N4 -|L M1 T1 N1 - L L|T5 N5 - L L T4 N4|- L L T2 N2 - M2|T3 N3 - L L T6 N6|- L M4 M4 M4 L L`.split("|").map(r=>r.split(" "));
 const SHIFTS=[["M","Mañana"],["T","Tarde"],["N","Noche"],["L","Libre"],["-","Saliente"]];
-const LAYS=[["","Nada"],["V","Vacaciones"],["B","Baja"],["AP","Asunto propio"],["O","Otro permiso"]];
-const LLAB={V:"VAC",B:"BAJA",AP:"AP",O:"PERM"};
+const LAYS=[["","Nada"],["V","Vacaciones"],["AP","Libre disp."],["B","Baja IT"],["AT","Accidente laboral"],["NA","Nacimiento"],["O","Permiso retribuido"],["SS","Sin sueldo"]];
+const LLAB={V:"VAC",B:"BAJA",AP:"AP",O:"PERM",AT:"ACC",NA:"NAC",SS:"S/S"};
+const CREDIT=l=>l==="B"||l==="AT"||l==="NA"||l==="O";
 const MES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 const MES3=MES.map(m=>m.slice(0,3));
 const DOW=["L","M","X","J","V","S","D"];
@@ -257,9 +261,9 @@ const shiftN=(n,t)=>(DN(n).ov&&DN(n).ov[key(t)])||cellN(n,t)[0];
 const layN=(n,t)=>(DN(n).lay&&DN(n).lay[key(t)])||"";
 const dblN=(n,t)=>(DN(n).dbl&&DN(n).dbl[key(t)])||[];
 const nm=n=>(S.names&&S.names[n]&&String(S.names[n]).trim())||("Nº "+n);
-function crew(t,c){const out=[];for(let n=1;n<=35;n++){if(n===S.n)continue;const l=layN(n,t);const on=(shiftN(n,t)===c&&l!=="V"&&l!=="AP"&&l!=="B"&&l!=="O")||dblN(n,t).includes(c);if(on){const ce=cellN(n,t);out.push(nm(n)+(ce[0]===c&&ce.length>1?" ("+ce+")":dblN(n,t).includes(c)?" (doblaje)":""))}}return out}
+function crew(t,c){const out=[];for(let n=1;n<=35;n++){if(n===S.n)continue;const l=layN(n,t);const on=(shiftN(n,t)===c&&!l)||dblN(n,t).includes(c);if(on){const ce=cellN(n,t);out.push(nm(n)+(ce[0]===c&&ce.length>1?" ("+ce+")":dblN(n,t).includes(c)?" (doblaje)":""))}}return out}
 const sh=c=>"MTN".includes(c)&&c.length===1?(+S.hours[c]||0):0;
-const off=t=>{const l=layer(t);return l==="V"||l==="AP"};
+const off=t=>{const l=layer(t);return l==="V"||l==="AP"||l==="SS"};
 const hoursAt=t=>(off(t)?0:sh(shift(t)))+dbl(t).reduce((a,c)=>a+sh(c),0);
 const isNight=t=>shift(t)==="N"&&!off(t);
 const nNights=t=>(isNight(t)?1:0)+dbl(t).filter(c=>c==="N").length;
@@ -271,15 +275,15 @@ const now=new Date();const TODAY=utc(now.getFullYear(),now.getMonth(),now.getDat
 let cy,cm,mode="";
 try{const s=sessionStorage.getItem("turnos-mes");if(s){[cy,cm]=s.split("-").map(Number)}}catch(e){}
 if(cy==null){cy=now.getFullYear()<2027?2027:now.getFullYear();cm=now.getFullYear()<2027?0:now.getMonth()}
-function stats(y,m0,m1){const r={h:0,mt:0,n:0,vn:0,vh:0,ap:0,apH:0,vH:0,bn:0,nn:0,db:0,dbH:0,rot:0,days:0};
+function stats(y,m0,m1){const r={h:0,mt:0,n:0,vn:0,vh:0,ap:0,apH:0,vH:0,bn:0,pn:0,ss:0,nn:0,db:0,dbH:0,rot:0,days:0};
 for(let m=m0;m<=m1;m++){const days=new Date(Date.UTC(y,m+1,0)).getUTCDate();for(let d=1;d<=days;d++){const t=utc(y,m,d),c=shift(t),l=layer(t);r.h+=hoursAt(t);r.rot+=sh(c);r.days++;
 if((c==="M"||c==="T")&&!off(t))r.mt++;r.n+=nNights(t);for(const x of dbl(t)){r.db++;r.dbH+=sh(x);if(x!=="N")r.mt++}
-if(l==="V"){r.vn++;r.vH+=sh(c);if(habil(t))r.vh++}if(l==="AP"){r.ap+=weight(t);r.apH+=sh(c)}if(l==="B")r.bn++;if(P().notes[key(t)])r.nn++}}return r}
+if(l==="V"){r.vn++;r.vH+=sh(c);if(habil(t))r.vh++}if(l==="AP"){r.ap+=weight(t);r.apH+=sh(c)}if(CREDIT(l)&&l!=="O")r.bn++;if(l==="O")r.pn++;if(l==="SS")r.ss++;if(P().notes[key(t)])r.nn++}}return r}
 const jornada=n=>{const j=parseFloat(S.jor);if(j>0)return j;return n===0?1533:n>63?1340:1529-3*n};
 const fmt=x=>(Math.round(x*10)/10).toLocaleString("es-ES");
 const sg=x=>(x>=0?"+":"−")+fmt(Math.abs(x));
 function extras(){const a=+S.antig||0,tr=Math.floor(a/3);return{vac:a>=30?4:a>=25?3:a>=20?2:a>=15?1:0,ld:tr>=8?tr-5:tr>=6?2:0,tr}}
-function calc(y){const r=stats(y,0,11),J=jornada(r.n),d=P();
+function calc(y){const r=stats(y,0,11),J=jornada(r.n)*(r.ss?(329-r.ss)/329:1),d=P();
 const X=extras();const vPlan=d.vacY[y]!=null?+d.vacY[y]:(+S.vacDef||0)+X.vac;
 const avg=r.rot/r.days,vPend=Math.max(0,vPlan-r.vn),vPendH=vPend*avg;
 const after=r.h+r.apH-J-vPendH;const apH=Math.max(0,Math.floor(after/7));const apTot=apH+X.ld;
@@ -288,7 +292,7 @@ function render(){
 try{sessionStorage.setItem("turnos-mes",cy+"-"+cm)}catch(e){}
 $("mt").textContent=MES[cm]+" "+cy;
 const st=stats(cy,cm,cm);
-$("kpi").innerHTML=`<div><span class="big">${fmt(st.h)}</span> <span>horas en ${MES[cm]}</span></div><span><b>${st.mt}</b> M/T · <b>${st.n}</b> noches${st.vn?` · <b>${st.vn}</b> vac.`:""}${st.ap?` · <b>${st.ap}</b> AP`:""}${st.bn?` · <b>${st.bn}</b> baja`:""}${st.db?` · <b>${st.db}</b> doblaje${st.db>1?"s":""}`:""}${st.nn?` · <b style="color:#e11d48">${st.nn}</b> notas`:""}</span>`;
+$("kpi").innerHTML=`<div><span class="big">${fmt(st.h)}</span> <span>horas en ${MES[cm]}</span></div><span><b>${st.mt}</b> M/T · <b>${st.n}</b> noches${st.vn?` · <b>${st.vn}</b> vac.`:""}${st.ap?` · <b>${st.ap}</b> AP`:""}${st.bn?` · <b>${st.bn}</b> baja`:""}${st.pn?` · <b>${st.pn}</b> permiso`:""}${st.ss?` · <b>${st.ss}</b> sin sueldo`:""}${st.db?` · <b>${st.db}</b> doblaje${st.db>1?"s":""}`:""}${st.nn?` · <b style="color:#e11d48">${st.nn}</b> notas`:""}</span>`;
 const first=utc(cy,cm,1);let t=first-dow(first)*DAY;const last=utc(cy,cm+1,0);
 let h=DOW.map(d=>`<div class="dh">${d}</div>`).join("")+`<div class="dh">h</div>`;
 while(t<=last){let wh=0;const w=rotWeek(t)+1;
@@ -322,8 +326,8 @@ $("bal").innerHTML=`<div class="vin"><label for="vacy">Vacaciones que coges en $
 <div class="box"><b>${sg(c.left)} h</b><span>te quedarías a final de año</span></div>
 </div>
 <p class="verdict">${c.after<0?`Con ${c.vPlan} días de vacaciones te faltarían <b>${fmt(-c.after)} h</b> para llegar a la jornada: no te toca ningún AP.`:`Con ${c.vPlan} días de vacaciones te tocan <b>${c.apTot} AP</b>${c.apRest>0?` (te quedan <b>${c.apRest}</b> por poner)`:c.apRest<0?` (has puesto <b>${-c.apRest}</b> de más)`:" y ya los has puesto todos"}, y te quedarías con <b>${sg(c.left)} h</b> de saldo.`}</p>
-<p class="note">${c.vPend?`Los ${c.vPend} días de vacaciones que aún no has marcado se estiman en ${fmt(c.avg)} h por día (media de tu cuadrante). Al marcarlos en el calendario se usan las horas exactas de los turnos que tapan: coger vacaciones sobre noches o semanas cargadas te deja más AP.`:`Todas las vacaciones están marcadas en el calendario: el cálculo usa las horas exactas.`}${r.bn?` Tienes ${r.bn} días de baja: cuentan las horas del turno que tapan.`:""}${r.db?` Llevas ${r.db} doblaje${r.db>1?"s":""} (+${fmt(r.dbH)} h), ya sumados.`:""}</p>
-<p class="note">Estatuto Marco (Ley 55/2003): vacaciones de al menos 30 días naturales al año (art. 53), o la parte proporcional si no trabajas el año entero, y solo se pagan en dinero si dejas el puesto. Los permisos y días de libre disposición los fija el SERGAS (art. 61): 6 días al año, ya incluidos en la jornada y por tanto en el cómputo, más 2 al cumplir el 6.º trienio y 1 más por trienio desde el 8.º. Por antigüedad hay 1 día extra de vacaciones a los 15 años, 2 a los 20, 3 a los 25 y 4 a los 30.${c.X.vac||c.X.ld?` Con ${S.antig} años te suman ${c.X.vac} día${c.X.vac===1?"":"s"} de vacaciones y ${c.X.ld} AP.`:` Pon tus años de servicio en Ajustes para sumarlos.`}</p>
+<p class="note">${c.vPend?`Los ${c.vPend} días de vacaciones que aún no has marcado se estiman en ${fmt(c.avg)} h por día (media de tu cuadrante). Al marcarlos en el calendario se usan las horas exactas de los turnos que tapan: coger vacaciones sobre noches o semanas cargadas te deja más AP.`:`Todas las vacaciones están marcadas en el calendario: el cálculo usa las horas exactas.`}${r.bn||r.pn?` Tienes ${r.bn} días de baja y ${r.pn} de permiso retribuido: cuentan como trabajados, con las horas del turno que tapan.`:""}${r.ss?` ${r.ss} días sin sueldo: no cuentan horas y la jornada baja en proporción (${fmt(c.J)} h).`:""}${r.db?` Llevas ${r.db} doblaje${r.db>1?"s":""} (+${fmt(r.dbH)} h), ya sumados.`:""}</p>
+<p class="note">Estatuto Marco (Ley 55/2003): vacaciones de al menos 30 días naturales al año (art. 53), o la parte proporcional si no trabajas el año entero, y solo se pagan en dinero si dejas el puesto. Son 30 días naturales, no 31: la jornada del SERGAS se calcula sobre 329 días (365 − 30 de vacaciones − 6 de libre disposición). Si coges un mes entero de 31 días, ese día de más sale de tus AP o de tus horas. Los permisos y días de libre disposición los fija el SERGAS (art. 61): 6 días al año, ya incluidos en la jornada y por tanto en el cómputo, más 2 al cumplir el 6.º trienio y 1 más por trienio desde el 8.º. Por antigüedad hay 1 día extra de vacaciones a los 15 años, 2 a los 20, 3 a los 25 y 4 a los 30.${c.X.vac||c.X.ld?` Con ${S.antig} años te suman ${c.X.vac} día${c.X.vac===1?"":"s"} de vacaciones y ${c.X.ld} AP.`:` Pon tus años de servicio en Ajustes para sumarlos.`}</p>
 <button class="lnk" id="clrV">Quitar todas las vacaciones de ${y}</button> · <button class="lnk" id="clrA">Quitar todos los AP de ${y}</button>`;
 }
 function renderYear(){
@@ -349,7 +353,7 @@ const el=$("nump");if(!selNum){el.innerHTML="";return}
 const n=selNum,days=new Date(Date.UTC(cy,cm+1,0)).getUTCDate(),f=utc(cy,cm,1);let hrs=0,cells="";
 for(let i=0;i<dow(f);i++)cells+="<span style='border:0'></span>";
 for(let d=1;d<=days;d++){const t=utc(cy,cm,d),c=shiftN(n,t),l=layN(n,t),db=dblN(n,t),ce=cellN(n,t);
-if(!(l==="V"||l==="AP"))hrs+=sh(c);for(const x of db)hrs+=sh(x);
+if(!(l==="V"||l==="AP"||l==="SS"))hrs+=sh(c);for(const x of db)hrs+=sh(x);
 cells+=`<span class="${l?"ly-"+l:"c-"+(c==="-"?"D":c)}"><small>${d}</small>${l?LLAB[l]:c==="-"?"–":c}${db.length?"+"+db.join(""):""}${!l&&ce[0]===c&&ce.length>1?`<small>${esc(ce.slice(1))}</small>`:""}</span>`}
 el.innerHTML=`<div class="nump"><div class="hd"><div><label for="cnm">Nombre del Nº ${n}${n===S.n?" (tú)":""}</label><input id="cnm" data-n="${n}" maxlength="30" placeholder="Nº ${n}" value="${esc((S.names||{})[n]||"")}"></div><button class="nb" id="cnx" aria-label="Cerrar">×</button></div>
 <div class="note" style="margin-top:6px">${MES[cm]} ${cy}: ${fmt(hrs)} h</div>
@@ -362,7 +366,7 @@ const days=new Date(Date.UTC(cy,cm+1,0)).getUTCDate();
 if(!selDay||selDay>days){const td=new Date(TODAY);selDay=(td.getUTCFullYear()===cy&&td.getUTCMonth()===cm)?td.getUTCDate():1}
 $("ct").textContent="Cartelera "+MES[cm]+" "+cy;
 const t0=utc(cy,cm,selDay),NAMES={M:"Mañana",T:"Tarde",N:"Noche"};
-const who=c=>{const l=[];for(let n=1;n<=35;n++){const lay=layN(n,t0);const on=(shiftN(n,t0)===c&&lay!=="V"&&lay!=="AP"&&lay!=="B"&&lay!=="O")||dblN(n,t0).includes(c);if(on){const ce=cellN(n,t0);l.push((n===S.n?"<b style='display:inline'>":"")+esc(nm(n))+(ce[0]===c&&ce.length>1?" <small>("+esc(ce)+")</small>":"")+(n===S.n?" (tú)</b>":""))}}return l};
+const who=c=>{const l=[];for(let n=1;n<=35;n++){const lay=layN(n,t0);const on=(shiftN(n,t0)===c&&!lay)||dblN(n,t0).includes(c);if(on){const ce=cellN(n,t0);l.push((n===S.n?"<b style='display:inline'>":"")+esc(nm(n))+(ce[0]===c&&ce.length>1?" <small>("+esc(ce)+")</small>":"")+(n===S.n?" (tú)</b>":""))}}return l};
 $("dayp").innerHTML=`<div style="background:none;padding:0"><b style="font-size:15px;color:inherit">${["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"][dow(t0)]} ${selDay} de ${MES[cm]}</b></div>`+["M","T","N"].map(c=>{const l=who(c);return`<div><b>${NAMES[c]} · ${l.length}</b>${l.length?l.join(", "):"nadie"}</div>`}).join("");
 let h="<thead><tr><th class='who'>Nº</th>";
 for(let d=1;d<=days;d++){const t=utc(cy,cm,d);h+=`<th data-d="${d}" class="${d===selDay?"sel":""}" style="${fest(t)||dow(t)>4?"color:#d6293e":""}">${d}<br>${DOW[dow(t)]}</th>`}
@@ -370,7 +374,7 @@ h+="</tr></thead><tbody>";
 const cnt={M:Array(days+1).fill(0),T:Array(days+1).fill(0),N:Array(days+1).fill(0)};
 for(let n=1;n<=35;n++){h+=`<tr data-n="${n}" class="${n===S.n?"me":""}"><th class="who" title="${esc(nm(n))}">${n}${S.names&&S.names[n]?" "+esc(S.names[n]):""}</th>`;
 for(let d=1;d<=days;d++){const t=utc(cy,cm,d),c=shiftN(n,t),l=layN(n,t),db=dblN(n,t);
-if(!(l==="V"||l==="AP"||l==="B"||l==="O")&&cnt[c])cnt[c][d]++;for(const x of db)cnt[x][d]++;
+if(!l&&cnt[c])cnt[c][d]++;for(const x of db)cnt[x][d]++;
 const show=l?LLAB[l][0]:c==="-"?"–":c;const cls=l?"ly-"+l:"c-"+(c==="-"?"D":c);
 h+=`<td data-d="${d}" class="${cls}${d===selDay?" sel":""}">${show}${db.length?"+":""}</td>`}
 h+="</tr>"}
@@ -409,15 +413,15 @@ function drawOpts(){
 $("opts").innerHTML=SHIFTS.map(([c,n])=>`<button class="opt c-${c==="-"?"D":c}${c===pick?" sel":""}" data-c="${esc(c)}"><b>${c==="-"?"–":c}</b><small>${n}${sh(c)?" · "+sh(c)+"h":""}</small></button>`).join("");
 const w=pick==="N"?2:1;
 $("dbls").innerHTML=["M","T","N"].map(c=>`<button class="opt ${pickD.includes(c)?"c-"+c+" sel":""}" data-d="${c}"><b>+${c}</b><small>${pickD.includes(c)?"Quitar":"Añadir"} · ${sh(c)}h</small></button>`).join("");
-{const t=parse(cur),parts=[];const mine=[];if("MTN".includes(pick)&&pick!=="L"&&pickL!=="V"&&pickL!=="AP"&&pickL!=="B"&&pickL!=="O")mine.push(pick);for(const x of pickD)if(!mine.includes(x))mine.push(x);
+{const t=parse(cur),parts=[];const mine=[];if("MTN".includes(pick)&&pick!=="L"&&!pickL)mine.push(pick);for(const x of pickD)if(!mine.includes(x))mine.push(x);
 const NAMES={M:"Mañana",T:"Tarde",N:"Noche"};
 const HR={M:[8,15],T:[15,22],N:[22,32]};let warn="";
 {const sp=[...mine].sort((a,b)=>HR[a][0]-HR[b][0]);let run=0,maxr=0,endp=null;for(const c of sp){const[a,b]=HR[c];run=(endp===a)?run+(b-a):(b-a);endp=b;maxr=Math.max(maxr,run)}
 if(maxr>12)warn=`<div style="color:#d6293e;font-weight:700;margin-bottom:6px">Ojo: ${maxr} h seguidas. El Estatuto Marco pone un máximo de 12 h ininterrumpidas (art. 51), salvo excepciones del servicio.</div>`;
 const prev=parse(cur)-DAY,ps=[shift(prev),...dbl(prev)].filter(x=>"MTN".includes(x)&&x.length===1&&!(off(prev)&&x===shift(prev)));const first=sp[0];
 if(first&&ps.length){const lastEnd=Math.max(...ps.map(x=>HR[x][1]))-24;const rest=HR[first][0]-lastEnd;if(rest<12)warn+=`<div style="color:#d6293e;font-weight:700;margin-bottom:6px">Ojo: solo ${rest} h de descanso desde el turno del día anterior. El mínimo son 12 h (art. 51), salvo excepciones.</div>`}}
-$("crew").innerHTML=warn+(mine.length?"<div class='sub' style='margin:0 0 6px'>Con quién te toca</div>"+mine.map(c=>{const l=crew(t,c);return`<div><b>${NAMES[c]}:</b> ${l.length?esc(l.join(", ")):"nadie más de la lista"}</div>`}).join(""):"<span class='note'>Este día no trabajas.</span>")}
-$("lays").innerHTML=LAYS.map(([c,n])=>`<button class="opt ${c?"c-"+(c==="AP"?"AP":c):""}${c===pickL?" sel":""}" data-l="${c}"><b>${c?LLAB[c]:"—"}</b><small>${n}${c==="AP"&&w===2?" ×2":c==="V"||c==="AP"?" · −"+sh(pick)+"h":""}</small></button>`).join("");
+$("crew").innerHTML=warn+(mine.length?"<div class='sub' style='margin:0 0 6px'>Quién está contigo</div>"+mine.map(c=>{const l=crew(t,c);return`<div><b>${NAMES[c]}:</b> ${l.length?esc(l.join(", ")):"nadie más de la lista"}</div>`}).join(""):"<span class='note'>Este día no trabajas.</span>")+`<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Ver todo el día (mañana, tarde y noche)</summary>${["M","T","N"].map(c=>{const l=[];for(let n=1;n<=35;n++){const lay=layN(n,t);if((shiftN(n,t)===c&&!lay)||dblN(n,t).includes(c)){const ce=cellN(n,t);l.push(esc(nm(n))+(n===S.n?" (tú)":"")+(ce[0]===c&&ce.length>1?" ("+esc(ce)+")":""))}}return`<div style="margin-top:6px"><b>${NAMES[c]} · ${l.length}:</b> ${l.join(", ")||"nadie"}</div>`}).join("")}</details>`}
+$("lays").innerHTML=LAYS.map(([c,n])=>`<button class="opt ${c?"c-"+c:""}${c===pickL?" sel":""}" data-l="${c}"><b>${c?LLAB[c]:"—"}</b><small>${n}${c==="AP"&&w===2?" ×2":c==="V"||c==="AP"||c==="SS"?" · −"+sh(pick)+"h":CREDIT(c)?" · cuenta "+sh(pick)+"h":""}</small></button>`).join("");
 }
 function close(){$("sheet").classList.remove("on");cur=null}
 $("opts").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;pick=b.dataset.c;drawOpts()});
