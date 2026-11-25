@@ -77,7 +77,8 @@ input,select{width:100%;height:44px;border-radius:10px;border:1px solid var(--li
 @media(prefers-reduced-motion:no-preference){.panel{animation:up .18s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.4}}}
 @media(max-width:420px){.cal{grid-template-columns:repeat(7,minmax(0,1fr)) 36px;gap:3px}.d{border-radius:8px}.d .n{font-size:11px;left:4px}}
 .d.ch{outline:2px dashed currentColor;outline-offset:-4px}
-.d.hn::before{content:"";position:absolute;top:0;right:0;border-style:solid;border-width:0 14px 14px 0;border-color:transparent var(--ink) transparent transparent;border-top-right-radius:9px}
+.d.hn::before{content:"✎";position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#e11d48;color:#fff;font-size:13px;line-height:22px;text-align:center;font-weight:800;border:2px solid var(--bg);box-shadow:0 2px 6px #0005;z-index:2}
+.d.hn{border:2px solid #e11d48}
 .d .ly{position:absolute;left:0;right:0;bottom:0;height:30%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.02em;border-radius:0 0 9px 9px}
 .d.lay .s{opacity:.45;margin-top:-22%}
 .ly-V{background:var(--V);color:var(--Vi)}.ly-B{background:var(--B);color:var(--Bi)}.ly-AP{background:var(--A);color:var(--Ai)}.ly-O{background:var(--O);color:var(--Oi)}
@@ -101,7 +102,7 @@ textarea{font:inherit;font-size:16px;width:100%;border-radius:10px;border:1px so
 </div>
 <div class="cal" id="cal"></div>
 <div class="live" id="live" aria-live="polite"></div>
-<div class="leg"><span><i style="background:var(--M)"></i>M mañana</span><span><i style="background:var(--T)"></i>T tarde</span><span><i style="background:var(--N)"></i>N noche</span><span><i style="background:var(--D)"></i>– saliente</span><span><i></i>L libre</span><span><i style="background:var(--V)"></i>franja VAC vacaciones</span><span><i style="background:var(--B)"></i>BAJA</span><span><i style="background:var(--A)"></i>AP</span><span><i style="background:var(--O)"></i>PERM otro permiso</span><span>◥ tiene nota</span><span>borde discontinuo = turno cambiado</span><span style="color:#d6293e">nº rojo = festivo</span></div>
+<div class="leg"><span><i style="background:var(--M)"></i>M mañana</span><span><i style="background:var(--T)"></i>T tarde</span><span><i style="background:var(--N)"></i>N noche</span><span><i style="background:var(--D)"></i>– saliente</span><span><i></i>L libre</span><span><i style="background:var(--V)"></i>franja VAC vacaciones</span><span><i style="background:var(--B)"></i>BAJA</span><span><i style="background:var(--A)"></i>AP</span><span><i style="background:var(--O)"></i>PERM otro permiso</span><span><i style="background:#e11d48;border-radius:50%"></i>✎ tiene nota</span><span>borde discontinuo = turno cambiado</span><span style="color:#d6293e">nº rojo = festivo</span></div>
 <p class="note">Toca un día para cambiar el turno, ponerle vacaciones o baja encima, o escribir una nota. Con «Probar vacaciones» cada toque pone o quita vacaciones al momento y abajo ves cómo cambia el cómputo.</p>
 <div id="notes"></div>
 <div id="st"></div>
@@ -187,10 +188,10 @@ const now=new Date();const TODAY=utc(now.getFullYear(),now.getMonth(),now.getDat
 let cy,cm,mode="";
 try{const s=sessionStorage.getItem("turnos-mes");if(s){[cy,cm]=s.split("-").map(Number)}}catch(e){}
 if(cy==null){cy=now.getFullYear()<2027?2027:now.getFullYear();cm=now.getFullYear()<2027?0:now.getMonth()}
-function stats(y,m0,m1){const r={h:0,mt:0,n:0,vn:0,vh:0,ap:0,apH:0,vH:0,bn:0,rot:0,days:0};
+function stats(y,m0,m1){const r={h:0,mt:0,n:0,vn:0,vh:0,ap:0,apH:0,vH:0,bn:0,nn:0,rot:0,days:0};
 for(let m=m0;m<=m1;m++){const days=new Date(Date.UTC(y,m+1,0)).getUTCDate();for(let d=1;d<=days;d++){const t=utc(y,m,d),c=shift(t),l=layer(t);r.h+=hoursAt(t);r.rot+=sh(c);r.days++;
 if((c==="M"||c==="T")&&!off(t))r.mt++;if(isNight(t))r.n++;
-if(l==="V"){r.vn++;r.vH+=sh(c);if(habil(t))r.vh++}if(l==="AP"){r.ap+=weight(t);r.apH+=sh(c)}if(l==="B")r.bn++}}return r}
+if(l==="V"){r.vn++;r.vH+=sh(c);if(habil(t))r.vh++}if(l==="AP"){r.ap+=weight(t);r.apH+=sh(c)}if(l==="B")r.bn++;if(P().notes[key(t)])r.nn++}}return r}
 const jornada=n=>{const j=parseFloat(S.jor);if(j>0)return j;return n===0?1533:n>63?1340:1529-3*n};
 const fmt=x=>(Math.round(x*10)/10).toLocaleString("es-ES");
 const sg=x=>(x>=0?"+":"−")+fmt(Math.abs(x));
@@ -203,7 +204,7 @@ function render(){
 try{sessionStorage.setItem("turnos-mes",cy+"-"+cm)}catch(e){}
 $("mt").textContent=MES[cm]+" "+cy;
 const st=stats(cy,cm,cm);
-$("kpi").innerHTML=`<div><span class="big">${fmt(st.h)}</span> <span>horas en ${MES[cm]}</span></div><span><b>${st.mt}</b> M/T · <b>${st.n}</b> noches${st.vn?` · <b>${st.vn}</b> vac.`:""}${st.ap?` · <b>${st.ap}</b> AP`:""}${st.bn?` · <b>${st.bn}</b> baja`:""}</span>`;
+$("kpi").innerHTML=`<div><span class="big">${fmt(st.h)}</span> <span>horas en ${MES[cm]}</span></div><span><b>${st.mt}</b> M/T · <b>${st.n}</b> noches${st.vn?` · <b>${st.vn}</b> vac.`:""}${st.ap?` · <b>${st.ap}</b> AP`:""}${st.bn?` · <b>${st.bn}</b> baja`:""}${st.nn?` · <b style="color:#e11d48">${st.nn}</b> notas`:""}</span>`;
 const first=utc(cy,cm,1);let t=first-dow(first)*DAY;const last=utc(cy,cm+1,0);
 let h=DOW.map(d=>`<div class="dh">${d}</div>`).join("")+`<div class="dh">h</div>`;
 while(t<=last){let wh=0;const w=rotWeek(t)+1;
