@@ -100,12 +100,17 @@ details.nt{background:var(--card);border-radius:12px;padding:10px 12px;margin:6p
 textarea{font:inherit;font-size:16px;width:100%;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;padding:8px 10px}
 .sub{font-size:13px;color:var(--mut);margin:12px 0 -6px;font-weight:600}
 .lnk{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;padding:8px 0;font-size:14px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:8;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--bg);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom))}
-.tabs button{height:48px;border:0;background:none;border-radius:12px;font-weight:700;font-size:13px;color:var(--mut);cursor:pointer}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:8;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:var(--bg);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom))}
+.tabs button{height:48px;border:0;background:none;border-radius:12px;font-weight:700;font-size:12px;padding:0 2px;color:var(--mut);cursor:pointer}
 .tabs button.on{background:var(--ink);color:var(--bg)}
 main{padding-bottom:96px}
 .live{bottom:76px}
 [hidden]{display:none!important}
+.qd{display:flex;gap:8px;align-items:center;margin:6px 0 12px}.qd input{flex:1;height:48px;font-size:18px;font-weight:700}
+.qs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}.qs button{height:56px;border-radius:14px;font-size:18px;font-weight:800;cursor:pointer;border:0;opacity:.45}.qs button.on{opacity:1;box-shadow:0 0 0 3px var(--ink)}
+.qhead{font-size:clamp(20px,5.5vw,26px);font-weight:800;margin:4px 0 10px;text-transform:none}
+.qlist{display:grid;gap:8px}.qp{background:var(--card);border-radius:14px;padding:14px 16px;font-size:clamp(24px,7vw,32px);font-weight:800;line-height:1.15;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.qp small{font-size:16px;font-weight:700;color:var(--mut);white-space:nowrap}.qp.me{background:var(--ink);color:var(--bg)}.qp.me small{color:inherit;opacity:.75}
 .d.split{background:none;overflow:hidden}
 .d .hf{position:absolute;left:0;right:0;height:50%;display:flex;align-items:center;justify-content:center}
 .d .hf.top{top:0}.d .hf.bot{bottom:0;border-top:2px solid var(--bg)}
@@ -161,6 +166,13 @@ details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 <div id="st"></div>
 </section>
 
+<section class="tab" data-tab="quien" hidden>
+<h2 style="margin-top:8px">¿Quién está?</h2>
+<div class="qd"><button class="nb" id="qprev" aria-label="Día anterior">‹</button><input id="qdate" type="date" aria-label="Día"><button class="nb" id="qnext" aria-label="Día siguiente">›</button></div>
+<div class="qs" id="qs" role="group" aria-label="Turno"><button data-c="M" class="c-M">Mañana</button><button data-c="T" class="c-T">Tarde</button><button data-c="N" class="c-N">Noche</button></div>
+<div id="qres"></div>
+</section>
+
 <section class="tab" data-tab="cartelera" hidden>
 <div class="cnav"><button class="nb" id="cprev" aria-label="Mes anterior">‹</button><h2 id="ct">Cartelera</h2><button class="nb" id="cnext" aria-label="Mes siguiente">›</button></div>
 <p class="note">Toca un día arriba para ver quién trabaja de mañana, tarde y noche. Toca una casilla para ver ese día. Toca el número de la izquierda para desplegar sus turnos del mes y ponerle nombre. Tu fila va marcada. Los nombres solo se guardan en este móvil.</p>
@@ -200,7 +212,7 @@ details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 <div class="note" id="bkm"></div>
 </section>
 </main>
-<nav class="tabs" id="tabs" aria-label="Secciones"><button data-t="turnos" class="on">Turnos</button><button data-t="cartelera">Cartelera</button><button data-t="computo">Cómputo</button><button data-t="meses">Meses</button><button data-t="ajustes">Ajustes</button></nav>
+<nav class="tabs" id="tabs" aria-label="Secciones"><button data-t="turnos" class="on">Turnos</button><button data-t="quien">Quién</button><button data-t="cartelera">Cartelera</button><button data-t="computo">Cómputo</button><button data-t="meses">Meses</button><button data-t="ajustes">Ajustes</button></nav>
 
 <div class="sheet" id="sheet"><div class="panel" role="dialog" aria-modal="true" aria-labelledby="sh">
 <h3 id="sh"></h3><div class="note" id="sinfo"></div>
@@ -341,7 +353,20 @@ function renderChg(){
 const d=P(),ks=[...new Set([...Object.keys(d.ov),...Object.keys(d.lay),...Object.keys(d.dbl)])].filter(k=>k.startsWith(cy+"-")).sort();
 $("chg").innerHTML=ks.length?`<ul class="chg">${ks.map(k=>{const t=parse(k),dd=new Date(t),parts=[];if(d.ov[k])parts.push(`${esc(cell(t))} → ${esc(d.ov[k])}`);if(d.lay[k])parts.push(`${LLAB[d.lay[k]]} sobre ${esc(shift(t))}`);if(d.dbl[k]&&d.dbl[k].length)parts.push(`doblaje +${esc(d.dbl[k].join(", "))}`);return`<li><b>${dd.getUTCDate()} ${MES3[dd.getUTCMonth()]}</b>: ${parts.join(" · ")}</li>`}).join("")}</ul>`:`<p class="note">En ${cy} todo sigue la rotación, sin vacaciones ni permisos marcados.</p>`;
 }
-let selDay=null,selNum=null;
+let selDay=null,selNum=null,qT=null,qC="M";
+function renderQuien(){
+if(qT==null){qT=TODAY<utc(2027,0,1)?utc(2027,0,1):TODAY;const sh0=shift(qT);if("MTN".includes(sh0)&&sh0.length===1)qC=sh0}
+$("qdate").value=key(qT);
+for(const b of $("qs").children)b.classList.toggle("on",b.dataset.c===qC);
+const d=new Date(qT),NAMES={M:"Mañana",T:"Tarde",N:"Noche"},HRS={M:"8–15 h",T:"15–22 h",N:"22–8 h"};
+const l=[];for(let n=1;n<=35;n++){const lay=layN(n,qT);const base=shiftN(n,qT)===qC&&!lay,ex=dblN(n,qT).includes(qC);if(base||ex){const ce=cellN(n,qT);l.push({n,me:n===S.n,g:ex&&!base?"doblaje":(ce[0]===qC&&ce.length>1?ce:"cambio")})}}
+l.sort((a,b)=>(b.me-a.me)||a.n-b.n);
+$("qres").innerHTML=`<div class="qhead">${NAMES[qC]} del ${["lunes","martes","miércoles","jueves","viernes","sábado","domingo"][dow(qT)]} ${d.getUTCDate()} de ${MES[d.getUTCMonth()]} · ${l.length} ${l.length===1?"persona":"personas"}</div>`+(l.length?`<div class="qlist">${l.map(p=>`<div class="qp${p.me?" me":""}"><span>${esc(nm(p.n))}${p.me?" (tú)":""}</span><small>${(S.names||{})[p.n]?"Nº "+p.n+" · ":""}${esc(p.g)}</small></div>`).join("")}</div>`:`<p class="note">Nadie de la lista en ese turno.</p>`)+`<p class="note">${HRS[qC]}. Los nombres los pones en Cartelera (tocando el número) o en Ajustes. Solo se tienen en cuenta los cambios que hayas apuntado tú; el resto sigue la rotación.</p>`;
+}
+$("qprev").addEventListener("click",()=>{qT-=DAY;renderQuien()});
+$("qnext").addEventListener("click",()=>{qT+=DAY;renderQuien()});
+$("qdate").addEventListener("change",e=>{if(e.target.value){qT=parse(e.target.value);renderQuien()}});
+$("qs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;qC=b.dataset.c;renderQuien()});
 const PALS=[["","Clásico"],["pastel","Pastel"],["contraste","Alto contraste"],["mar","Mar"],["otono","Otoño"],["gris","Grises"]];
 function applyPal(){if(S.pal)document.documentElement.dataset.pal=S.pal;else delete document.documentElement.dataset.pal}
 function renderPals(){$("pals").innerHTML=PALS.map(([k,n])=>`<button class="pal${(S.pal||"")===k?" on":""}" data-p="${k}" style="${k?"":""}">${n}<br><span data-pal-prev="${k}">${["M","T","N"].map(c=>`<i class="c-${c}">${c}</i>`).join("")}</span></button>`).join("");
@@ -380,7 +405,7 @@ h+=`<td data-d="${d}" class="${cls}${d===selDay?" sel":""}">${show}${db.length?"
 h+="</tr>"}
 h+="</tbody><tfoot>"+["M","T","N"].map(c=>`<tr><th class="who">${c}</th>${cnt[c].slice(1).map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")+"</tfoot>";
 $("cart").innerHTML=h;
-renderNum();
+renderNum();renderQuien();
 }
 function renderNames(){S.names=S.names||{};$("names").innerHTML=Array.from({length:35},(_,i)=>i+1).map(n=>`<div><label for="nm-${n}">Nº ${n}${n===S.n?" (tú)":""}</label><input id="nm-${n}" data-n="${n}" maxlength="30" value="${esc(S.names[n]||"")}"></div>`).join("")}
 $("names").addEventListener("change",e=>{const n=e.target.dataset.n;if(!n)return;S.names=S.names||{};const v=e.target.value.trim();if(v)S.names[n]=v;else delete S.names[n];render();save()});
