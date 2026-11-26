@@ -221,6 +221,8 @@ details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 <div class="crew" id="crew"></div>
 <div class="sub">Turno</div>
 <div class="opts" id="opts"></div>
+<div id="gpw"><div class="sub">¿Qué llevas? (grupo de pacientes)</div>
+<div class="opts" id="gps"></div></div>
 <div class="sub">Encima del turno</div>
 <div class="opts" id="lays"></div>
 <div class="sub">Doblaje (turno extra a mayores)</div>
@@ -254,7 +256,7 @@ x.n=Math.min(35,Math.max(1,+x.n||11));return x}
 try{S=JSON.parse($("estado").textContent)}catch(e){S={}}
 try{const l=JSON.parse(localStorage.getItem("turnos-diego")||"null");if(l&&l.ts>(S.ts||0))S=l}catch(e){}
 S=norm(S);
-const P=()=>{const d=S.data[S.n]||(S.data[S.n]={});d.ov=d.ov||{};d.notes=d.notes||{};d.vacY=d.vacY||{};d.dbl=d.dbl||{};
+const P=()=>{const d=S.data[S.n]||(S.data[S.n]={});d.ov=d.ov||{};d.notes=d.notes||{};d.vacY=d.vacY||{};d.dbl=d.dbl||{};d.gp=d.gp||{};
 if(!d.lay){d.lay={};for(const k in d.ov){const c=d.ov[k];if(["V","B","AP","O","E"].includes(c)){d.lay[k]=c==="E"?"AP":c;delete d.ov[k]}}}return d};
 const key=t=>new Date(t).toISOString().slice(0,10);
 const utc=(y,m,d)=>Date.UTC(y,m,d);
@@ -274,8 +276,11 @@ const DN=n=>S.data[n]||{};
 const shiftN=(n,t)=>(DN(n).ov&&DN(n).ov[key(t)])||cellN(n,t)[0];
 const layN=(n,t)=>(DN(n).lay&&DN(n).lay[key(t)])||"";
 const dblN=(n,t)=>(DN(n).dbl&&DN(n).dbl[key(t)])||[];
+const gpN=(n,t)=>{const s=shiftN(n,t);if(!"MTN".includes(s)||s.length!==1)return"";const x=DN(n).gp&&DN(n).gp[key(t)];if(x!=null)return x==="0"?"":x;const ce=cellN(n,t);return ce[0]===s?ce.slice(1):""};
+const ceN=(n,t)=>shiftN(n,t)+gpN(n,t);
+const myG=t=>gpN(S.n,t);
 const nm=n=>(S.names&&S.names[n]&&String(S.names[n]).trim())||("Nº "+n);
-function crew(t,c){const out=[];for(let n=1;n<=35;n++){if(n===S.n)continue;const l=layN(n,t);const on=(shiftN(n,t)===c&&!l)||dblN(n,t).includes(c);if(on){const ce=cellN(n,t);out.push(nm(n)+(ce[0]===c&&ce.length>1?" ("+ce+")":dblN(n,t).includes(c)?" (doblaje)":""))}}return out}
+function crew(t,c){const out=[];for(let n=1;n<=35;n++){if(n===S.n)continue;const l=layN(n,t);const on=(shiftN(n,t)===c&&!l)||dblN(n,t).includes(c);if(on){const ce=ceN(n,t);out.push(nm(n)+(ce[0]===c&&ce.length>1?" ("+ce+")":dblN(n,t).includes(c)?" (doblaje)":""))}}return out}
 const sh=c=>"MTN".includes(c)&&c.length===1?(+S.hours[c]||0):0;
 const off=t=>{const l=layer(t);return l==="V"||l==="AP"||l==="SS"};
 const hoursAt=t=>(off(t)?0:sh(shift(t)))+dbl(t).reduce((a,c)=>a+sh(c),0);
@@ -283,7 +288,14 @@ const isNight=t=>shift(t)==="N"&&!off(t);
 const nNights=t=>(isNight(t)?1:0)+dbl(t).filter(c=>c==="N").length;
 const weight=t=>shift(t)==="N"?2:1;
 function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=(h+l-7*m+114)%31+1;return utc(y,mo-1,da)}
-function fest(t){const d=new Date(t),m=d.getUTCMonth()+1,dd=d.getUTCDate(),y=d.getUTCFullYear();const f=["1-1","1-6","5-1","5-17","7-25","8-15","10-12","11-1","12-6","12-8","12-25"];const e=easter(y);return f.includes(m+"-"+dd)||t===e-2*DAY||t===e-3*DAY}
+const FEST={
+2026:{"1-1":"Año Nuevo","1-6":"Reyes","2-17":"Martes de Entroido (local Ourense)","3-19":"San José (Galicia)","4-2":"Jueves Santo","4-3":"Viernes Santo","5-1":"Día del Trabajo","6-24":"San Juan (Galicia)","7-25":"Día de Galicia / Santiago","8-15":"Asunción","10-12":"Fiesta Nacional","11-11":"San Martiño (local Ourense)","12-8":"Inmaculada","12-25":"Navidad"},
+2027:{"1-1":"Año Nuevo","1-6":"Reyes","2-9":"Martes de Entroido (local Ourense)","3-19":"San José (Galicia)","3-25":"Jueves Santo","3-26":"Viernes Santo","5-1":"Día del Trabajo","5-17":"Día das Letras Galegas (Galicia)","10-12":"Fiesta Nacional","11-1":"Todos los Santos","11-11":"San Martiño (local Ourense)","12-6":"Constitución","12-8":"Inmaculada","12-25":"Navidad"}};
+function festName(t){const d=new Date(t),m=d.getUTCMonth()+1,dd=d.getUTCDate(),y=d.getUTCFullYear(),k=m+"-"+dd;
+if(FEST[y])return FEST[y][k]||"";
+const e=easter(y);if(t===e-3*DAY)return"Jueves Santo (previsto)";if(t===e-2*DAY)return"Viernes Santo (previsto)";if(t===e-47*DAY)return"Martes de Entroido (previsto, local Ourense)";
+const f={"1-1":"Año Nuevo","1-6":"Reyes","5-1":"Día del Trabajo","5-17":"Letras Galegas (previsto)","7-25":"Día de Galicia (previsto)","8-15":"Asunción","10-12":"Fiesta Nacional","11-1":"Todos los Santos","11-11":"San Martiño (previsto, local Ourense)","12-6":"Constitución","12-8":"Inmaculada","12-25":"Navidad"};return f[k]||""}
+const fest=t=>!!festName(t);
 const habil=t=>dow(t)<5&&!fest(t);
 const now=new Date();const TODAY=utc(now.getFullYear(),now.getMonth(),now.getDate());
 let cy,cm,mode="";
@@ -314,9 +326,9 @@ const first=utc(cy,cm,1);let t=first-dow(first)*DAY;const last=utc(cy,cm+1,0);
 let h=DOW.map(d=>`<div class="dh">${d}</div>`).join("")+`<div class="dh">h</div>`;
 while(t<=last){let wh=0;const w=rotWeek(t)+1;
 for(let i=0;i<7;i++,t+=DAY){const c=shift(t),l=layer(t),k=key(t),d=new Date(t);wh+=hoursAt(t);
-const cls=["d","c-"+(c==="-"?"D":c)];if(d.getUTCMonth()!==cm)cls.push("out");if(t===TODAY)cls.push("today");if(P().ov[k])cls.push("ch");if(fest(t))cls.push("fe");if(P().notes[k])cls.push("hn");if(l)cls.push("lay");
-const g=!l&&"MTN".includes(c)&&c===base(t)?grp(t):"";
-const dd=dbl(t);const gc=!l&&"MTN".includes(c)&&c.length===1&&c===base(t)&&grp(t)?"gr"+grp(t):"";if(dd.length&&!l){cls[1]="split"}else if(gc)cls.push(gc);
+const cls=["d","c-"+(c==="-"?"D":c)];if(d.getUTCMonth()!==cm)cls.push("out");if(t===TODAY)cls.push("today");if(P().ov[k]||P().gp[k]!=null)cls.push("ch");if(fest(t))cls.push("fe");if(P().notes[k])cls.push("hn");if(l)cls.push("lay");
+const g=!l?myG(t):"";
+const dd=dbl(t);const gc=g?"gr"+g:"";if(dd.length&&!l){cls[1]="split"}else if(gc)cls.push(gc);
 h+=`<button class="${cls.join(" ")}" data-k="${k}" aria-label="${d.getUTCDate()} ${MES[d.getUTCMonth()]}: ${c}${g}${l?", "+LLAB[l]:""}${P().notes[k]?", con nota":""}"><span class="n">${d.getUTCDate()}</span>${dd.length&&!l?`<span class="hf top c-${c==="-"?"D":c} ${gc}"><span class="s">${c==="-"?"–":c}</span></span><span class="hf bot c-${dd[0]}"><span class="s">+${dd.join("")}</span></span>`:`<span class="s">${c==="-"?"–":c}</span>${g?`<span class="g">${g}</span>`:""}`}${l?`<span class="ly ly-${l}">${LLAB[l]}</span>`:""}${dd.length&&l?`<span class="db">+${dd.join("")}</span>`:""}</button>`}
 h+=`<div class="wk"><b>${fmt(wh)}</b>sem ${w}</div>`}
 $("cal").innerHTML=h;
@@ -325,6 +337,8 @@ renderNotes();renderLive();renderBal();renderYear();renderChg();renderCart();
 function renderNotes(){
 const ks=Object.keys(P().notes).filter(k=>{const d=new Date(parse(k));return d.getUTCFullYear()===cy&&d.getUTCMonth()===cm}).sort();
 $("notes").innerHTML=ks.length?`<h2 style="margin-top:18px">Notas de ${MES[cm]}</h2>`+ks.map(k=>{const d=new Date(parse(k)),n=P().notes[k];return`<details class="nt"><summary>${d.getUTCDate()} ${MES3[d.getUTCMonth()]} · ${esc(n.split("\n")[0])}</summary><p>${esc(n)}</p><button class="lnk" data-k="${k}">Editar este día</button></details>`}).join(""):"";
+{const fl=[];const days=new Date(Date.UTC(cy,cm+1,0)).getUTCDate();for(let d=1;d<=days;d++){const t=utc(cy,cm,d),f=festName(t);if(f)fl.push(`<b>${d}</b> ${esc(f)}`)}
+if(fl.length)$("notes").innerHTML+=`<p class="note" style="margin-top:12px">🎉 Festivos de ${MES[cm]} (Ourense): ${fl.join(" · ")}${FEST[cy]?"":" · aún sin calendario oficial, son previstos"}</p>`}
 }
 function renderLive(){
 const L=$("live");if(!mode){L.classList.remove("on");return}
@@ -365,7 +379,7 @@ if(qT==null){qT=TODAY<utc(2027,0,1)?utc(2027,0,1):TODAY;const sh0=shift(qT);if("
 $("qdate").value=key(qT);
 for(const b of $("qs").children)b.classList.toggle("on",b.dataset.c===qC);
 const d=new Date(qT),NAMES={M:"Mañana",T:"Tarde",N:"Noche"},HRS={M:"8–15 h",T:"15–22 h",N:"22–8 h"};
-const l=[];for(let n=1;n<=35;n++){const lay=layN(n,qT);const base=shiftN(n,qT)===qC&&!lay,ex=dblN(n,qT).includes(qC);if(base||ex){const ce=cellN(n,qT);l.push({n,me:n===S.n,g:ex&&!base?"doblaje":(ce[0]===qC&&ce.length>1?ce:"cambio")})}}
+const l=[];for(let n=1;n<=35;n++){const lay=layN(n,qT);const base=shiftN(n,qT)===qC&&!lay,ex=dblN(n,qT).includes(qC);if(base||ex){const ce=ceN(n,qT);l.push({n,me:n===S.n,g:ex&&!base?"doblaje":(ce[0]===qC&&ce.length>1?ce:"cambio")})}}
 l.sort((a,b)=>(b.me-a.me)||a.n-b.n);
 $("qres").innerHTML=`<div class="qhead">${NAMES[qC]} del ${["lunes","martes","miércoles","jueves","viernes","sábado","domingo"][dow(qT)]} ${d.getUTCDate()} de ${MES[d.getUTCMonth()]} · ${l.length} ${l.length===1?"persona":"personas"}</div>`+(l.length?`<div class="qlist">${l.map(p=>`<div class="qp${p.me?" me":""}"><span>${/^[MTN]\d$/.test(p.g)?`<i class="sw gr${p.g[1]}"></i>`:""}${esc(nm(p.n))}${p.me?" (tú)":""}</span><small>${(S.names||{})[p.n]?"Nº "+p.n+" · ":""}${esc(p.g)}</small></div>`).join("")}</div>`:`<p class="note">Nadie de la lista en ese turno.</p>`)+`<p class="note">${HRS[qC]}. Los nombres los pones en Cartelera (tocando el número) o en Ajustes. Solo se tienen en cuenta los cambios que hayas apuntado tú; el resto sigue la rotación.</p>`;
 }
@@ -397,7 +411,7 @@ const days=new Date(Date.UTC(cy,cm+1,0)).getUTCDate();
 if(!selDay||selDay>days){const td=new Date(TODAY);selDay=(td.getUTCFullYear()===cy&&td.getUTCMonth()===cm)?td.getUTCDate():1}
 $("ct").textContent="Cartelera "+MES[cm]+" "+cy;
 const t0=utc(cy,cm,selDay),NAMES={M:"Mañana",T:"Tarde",N:"Noche"};
-const who=c=>{const l=[];for(let n=1;n<=35;n++){const lay=layN(n,t0);const on=(shiftN(n,t0)===c&&!lay)||dblN(n,t0).includes(c);if(on){const ce=cellN(n,t0);l.push((n===S.n?"<b style='display:inline'>":"")+esc(nm(n))+(ce[0]===c&&ce.length>1?" <small>("+esc(ce)+")</small>":"")+(n===S.n?" (tú)</b>":""))}}return l};
+const who=c=>{const l=[];for(let n=1;n<=35;n++){const lay=layN(n,t0);const on=(shiftN(n,t0)===c&&!lay)||dblN(n,t0).includes(c);if(on){const ce=ceN(n,t0);l.push((n===S.n?"<b style='display:inline'>":"")+esc(nm(n))+(ce[0]===c&&ce.length>1?" <small>("+esc(ce)+")</small>":"")+(n===S.n?" (tú)</b>":""))}}return l};
 $("dayp").innerHTML=`<div style="background:none;padding:0"><b style="font-size:15px;color:inherit">${["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"][dow(t0)]} ${selDay} de ${MES[cm]}</b></div>`+["M","T","N"].map(c=>{const l=who(c);return`<div><b>${NAMES[c]} · ${l.length}</b>${l.length?l.join(", "):"nadie"}</div>`}).join("");
 let h="<thead><tr><th class='who'>Nº</th>";
 for(let d=1;d<=days;d++){const t=utc(cy,cm,d);h+=`<th data-d="${d}" class="${d===selDay?"sel":""}" style="${fest(t)||dow(t)>4?"color:#d6293e":""}">${d}<br>${DOW[dow(t)]}</th>`}
@@ -406,7 +420,7 @@ const cnt={M:Array(days+1).fill(0),T:Array(days+1).fill(0),N:Array(days+1).fill(
 for(let n=1;n<=35;n++){h+=`<tr data-n="${n}" class="${n===S.n?"me":""}"><th class="who" title="${esc(nm(n))}">${n}${S.names&&S.names[n]?" "+esc(S.names[n]):""}</th>`;
 for(let d=1;d<=days;d++){const t=utc(cy,cm,d),c=shiftN(n,t),l=layN(n,t),db=dblN(n,t);
 if(!l&&cnt[c])cnt[c][d]++;for(const x of db)cnt[x][d]++;
-const show=l?LLAB[l][0]:c==="-"?"–":c;const ce2=cellN(n,t);const cls=(l?"ly-"+l:"c-"+(c==="-"?"D":c))+(!l&&"MTN".includes(c)&&ce2[0]===c&&ce2.length>1?" gr"+ce2.slice(1):"");
+const show=l?LLAB[l][0]:c==="-"?"–":c;const ce2=ceN(n,t);const cls=(l?"ly-"+l:"c-"+(c==="-"?"D":c))+(!l&&"MTN".includes(c)&&ce2[0]===c&&ce2.length>1?" gr"+ce2.slice(1):"");
 h+=`<td data-d="${d}" class="${cls}${d===selDay?" sel":""}">${show}${db.length?"+":""}</td>`}
 h+="</tr>"}
 h+="</tbody><tfoot>"+["M","T","N"].map(c=>`<tr><th class="who">${c}</th>${cnt[c].slice(1).map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")+"</tfoot>";
@@ -435,14 +449,16 @@ const json=JSON.stringify(S).replace(/</g,"\\u003c");
 const html=SRC.replace(/(<script id="estado" type="application\/json">)[\s\S]*?(<\/script>)/,(m,a,b)=>a+json+b);
 try{await art.publish(html);$("st").textContent="Guardado."}catch(e){$("st").textContent="Guardado en este dispositivo (no se pudo guardar en la nube)."}
 }
-let cur=null,pick=null,pickL="",pickD=[];
-function openSheet(k){cur=k;const t=parse(k),d=new Date(t);pick=shift(t);pickL=layer(t);pickD=[...dbl(t)];
+let cur=null,pick=null,pickL="",pickD=[],pickG="";
+function openSheet(k){cur=k;const t=parse(k),d=new Date(t);pick=shift(t);pickL=layer(t);pickD=[...dbl(t)];pickG=myG(t);
 $("sh").textContent=["lunes","martes","miércoles","jueves","viernes","sábado","domingo"][dow(t)]+" "+d.getUTCDate()+" de "+MES[d.getUTCMonth()];
-$("sinfo").textContent="Rotación: "+cell(t)+" (semana "+(rotWeek(t)+1)+" de 35)";
+$("sinfo").textContent="Rotación: "+cell(t)+" (semana "+(rotWeek(t)+1)+" de 35)"+(festName(t)?" · Festivo: "+festName(t):"");
 $("nota").value=P().notes[k]||"";drawOpts();$("sheet").classList.add("on");$("ok").focus()}
 function drawOpts(){
 $("opts").innerHTML=SHIFTS.map(([c,n])=>`<button class="opt c-${c==="-"?"D":c}${c===pick?" sel":""}" data-c="${esc(c)}"><b>${c==="-"?"–":c}</b><small>${n}${sh(c)?" · "+sh(c)+"h":""}</small></button>`).join("");
 const w=pick==="N"?2:1;
+{const on="MTN".includes(pick)&&pick.length===1;$("gpw").style.display=on?"":"none";
+if(on)$("gps").innerHTML=["","1","2","3","4","5","6"].map(g=>`<button class="opt${g?" c-"+pick+" gr"+g:""}${g===pickG?" sel":""}" data-g="${g}"><b>${g?pick+g:pick}</b><small>${g?"Grupo "+g:"Sin grupo"}</small></button>`).join("")}
 $("dbls").innerHTML=["M","T","N"].map(c=>`<button class="opt ${pickD.includes(c)?"c-"+c+" sel":""}" data-d="${c}"><b>+${c}</b><small>${pickD.includes(c)?"Quitar":"Añadir"} · ${sh(c)}h</small></button>`).join("");
 {const t=parse(cur),parts=[];const mine=[];if("MTN".includes(pick)&&pick!=="L"&&!pickL)mine.push(pick);for(const x of pickD)if(!mine.includes(x))mine.push(x);
 const NAMES={M:"Mañana",T:"Tarde",N:"Noche"};
@@ -451,20 +467,22 @@ const HR={M:[8,15],T:[15,22],N:[22,32]};let warn="";
 if(maxr>12)warn=`<div style="color:#d6293e;font-weight:700;margin-bottom:6px">Ojo: ${maxr} h seguidas. El Estatuto Marco pone un máximo de 12 h ininterrumpidas (art. 51), salvo excepciones del servicio.</div>`;
 const prev=parse(cur)-DAY,ps=[shift(prev),...dbl(prev)].filter(x=>"MTN".includes(x)&&x.length===1&&!(off(prev)&&x===shift(prev)));const first=sp[0];
 if(first&&ps.length){const lastEnd=Math.max(...ps.map(x=>HR[x][1]))-24;const rest=HR[first][0]-lastEnd;if(rest<12)warn+=`<div style="color:#d6293e;font-weight:700;margin-bottom:6px">Ojo: solo ${rest} h de descanso desde el turno del día anterior. El mínimo son 12 h (art. 51), salvo excepciones.</div>`}}
-$("crew").innerHTML=warn+(mine.length?"<div class='sub' style='margin:0 0 6px'>Quién está contigo</div>"+mine.map(c=>{const l=crew(t,c);return`<div><b>${NAMES[c]}:</b> ${l.length?esc(l.join(", ")):"nadie más de la lista"}</div>`}).join(""):"<span class='note'>Este día no trabajas.</span>")+`<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Ver todo el día (mañana, tarde y noche)</summary>${["M","T","N"].map(c=>{const l=[];for(let n=1;n<=35;n++){const lay=layN(n,t);if((shiftN(n,t)===c&&!lay)||dblN(n,t).includes(c)){const ce=cellN(n,t);l.push(esc(nm(n))+(n===S.n?" (tú)":"")+(ce[0]===c&&ce.length>1?" ("+esc(ce)+")":""))}}return`<div style="margin-top:6px"><b>${NAMES[c]} · ${l.length}:</b> ${l.join(", ")||"nadie"}</div>`}).join("")}</details>`}
+$("crew").innerHTML=warn+(mine.length?"<div class='sub' style='margin:0 0 6px'>Quién está contigo</div>"+mine.map(c=>{const l=crew(t,c);return`<div><b>${NAMES[c]}:</b> ${l.length?esc(l.join(", ")):"nadie más de la lista"}</div>`}).join(""):"<span class='note'>Este día no trabajas.</span>")+`<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Ver todo el día (mañana, tarde y noche)</summary>${["M","T","N"].map(c=>{const l=[];for(let n=1;n<=35;n++){const lay=layN(n,t);if((shiftN(n,t)===c&&!lay)||dblN(n,t).includes(c)){const ce=ceN(n,t);l.push(esc(nm(n))+(n===S.n?" (tú)":"")+(ce[0]===c&&ce.length>1?" ("+esc(ce)+")":""))}}return`<div style="margin-top:6px"><b>${NAMES[c]} · ${l.length}:</b> ${l.join(", ")||"nadie"}</div>`}).join("")}</details>`}
 $("lays").innerHTML=LAYS.map(([c,n])=>`<button class="opt ${c?"c-"+c:""}${c===pickL?" sel":""}" data-l="${c}"><b>${c?LLAB[c]:"—"}</b><small>${n}${c==="AP"&&w===2?" ×2":c==="V"||c==="AP"||c==="SS"?" · −"+sh(pick)+"h":CREDIT(c)?" · cuenta "+sh(pick)+"h":""}</small></button>`).join("");
 }
 function close(){$("sheet").classList.remove("on");cur=null}
-$("opts").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;pick=b.dataset.c;drawOpts()});
+$("opts").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;pick=b.dataset.c;pickG=cur&&pick===base(parse(cur))?grp(parse(cur)):"";drawOpts()});
+$("gps").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;pickG=b.dataset.g;drawOpts()});
 $("dbls").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;const c=b.dataset.d;pickD=pickD.includes(c)?pickD.filter(x=>x!==c):[...pickD,c].sort((a,b)=>"MTN".indexOf(a)-"MTN".indexOf(b));drawOpts()});
 $("lays").addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;pickL=b.dataset.l;drawOpts()});
 $("ok").addEventListener("click",()=>{if(!cur)return;const t=parse(cur),d=P(),nota=$("nota").value.trim();
 if(pick!==base(t))d.ov[cur]=pick;else delete d.ov[cur];
+{const def=pick===base(t)&&"MTN".includes(pick)?grp(t):"";if("MTN".includes(pick)&&pick.length===1&&pickG!==def)d.gp[cur]=pickG||"0";else delete d.gp[cur]}
 if(pickL)d.lay[cur]=pickL;else delete d.lay[cur];
 if(pickD.length)d.dbl[cur]=pickD;else delete d.dbl[cur];
 if(nota)d.notes[cur]=nota;else delete d.notes[cur];
 close();render();save()});
-$("reset").addEventListener("click",()=>{if(!cur)return;const d=P();delete d.ov[cur];delete d.lay[cur];delete d.dbl[cur];close();render();save()});
+$("reset").addEventListener("click",()=>{if(!cur)return;const d=P();delete d.ov[cur];delete d.gp[cur];delete d.lay[cur];delete d.dbl[cur];close();render();save()});
 $("sheet").addEventListener("click",e=>{if(e.target.id==="sheet")close()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")close();if(!cur&&!["INPUT","SELECT","TEXTAREA"].includes(e.target.tagName)){if(e.key==="ArrowLeft")$("prev").click();if(e.key==="ArrowRight")$("next").click()}});
 $("cal").addEventListener("click",e=>{const b=e.target.closest(".d");if(!b)return;const k=b.dataset.k;
