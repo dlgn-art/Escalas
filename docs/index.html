@@ -252,7 +252,7 @@ const DOW=["L","M","X","J","V","S","D"];
 const DAY=86400000;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const DEF={v:4,ts:0,n:11,data:{},hours:{M:7,T:7,N:10},vacDef:30,jor:"",antig:0};
+const DEF={v:4,ts:0,n:11,data:{},hours:{M:7,T:7,N:10},vacDef:30,jor:"",antig:0,thr:3.5};
 let S;
 function norm(x){
 if(!x||typeof x!=="object")x={};
@@ -308,8 +308,11 @@ function extras(){const a=+S.antig||0,tr=Math.floor(a/3);return{vac:a>=30?4:a>=2
 function calc(y){const r=stats(y,0,11),J=jornada(r.n)*(r.ss?(329-r.ss)/329:1),d=P();
 const X=extras();const vPlan=d.vacY[y]!=null?+d.vacY[y]:(+S.vacDef||0)+X.vac;
 const avg=r.rot/r.days,vPend=Math.max(0,vPlan-r.vn),vPendH=vPend*avg;
-const after=r.h+r.apH-J-vPendH;const apH=Math.max(0,Math.floor(after/7));const apTot=apH+X.ld;
-return{r,J,vPlan,avg,vPend,vPendH,after,apH,apTot,X,left:after-apH*7,apRest:apTot-r.ap}}
+const after=r.h+r.apH-J-vPendH;const thr=+S.thr>0?+S.thr:3.5;let apH=0,owe=0,left;
+if(after>=0){apH=Math.floor(after/7);left=after-apH*7;if(left>=thr){apH++;left-=7}}
+else{const debt=-after;owe=Math.floor(debt/7);let rem=debt-owe*7;if(rem>=thr){owe++;rem-=7}left=-rem}
+const net=apH+X.ld-owe,apTot=Math.max(0,net),oweNet=Math.max(0,-net);
+return{r,J,vPlan,avg,vPend,vPendH,after,apH,owe,apTot,oweNet,thr,X,left,apRest:apTot-r.ap}}
 function render(){
 try{sessionStorage.setItem("turnos-mes",cy+"-"+cm)}catch(e){}
 $("mt").textContent=MES[cm]+" "+cy;
@@ -334,7 +337,7 @@ $("notes").innerHTML=ks.length?`<h2 style="margin-top:18px">Notas de ${MES[cm]}<
 function renderLive(){
 const L=$("live");if(!mode){L.classList.remove("on");return}
 const c=calc(cy);L.classList.add("on");
-L.innerHTML=`${mode==="V"?"Probando vacaciones":mode==="B"?"Poniendo bajas":"Poniendo AP"} en ${cy}: toca días para poner o quitar.<br><b>${c.r.vn}</b>/${c.vPlan} días de vacaciones (tapan ${fmt(c.r.vH)} h) · <b>${c.apTot} AP</b> por cómputo · saldo <b>${sg(c.left)} h</b>${c.r.bn?` · ${c.r.bn} días de baja`:""}`;
+L.innerHTML=`${mode==="V"?"Probando vacaciones":mode==="B"?"Poniendo bajas":"Poniendo AP"} en ${cy}: toca días para poner o quitar.<br><b>${c.r.vn}</b>/${c.vPlan} días de vacaciones (tapan ${fmt(c.r.vH)} h) · ${c.oweNet?`debes <b>${c.oweNet}</b> turno${c.oweNet>1?"s":""}`:`<b>${c.apTot} AP</b> por cómputo`} · saldo suelto <b>${sg(c.left)} h</b>${c.r.bn?` · ${c.r.bn} días de baja`:""}`;
 }
 function renderBal(){
 const y=cy,c=calc(y),r=c.r;
@@ -343,11 +346,12 @@ $("bal").innerHTML=`<div class="vin"><label for="vacy">Vacaciones que coges en $
 <div class="box"><b>${fmt(r.rot)}</b><span>horas de tu cuadrante en ${y}</span></div>
 <div class="box"><b>${fmt(c.J)}</b><span>jornada SERGAS con ${r.n} noches${parseFloat(S.jor)>0?" (manual)":""}</span></div>
 <div class="box"><b>−${fmt(r.vH+c.vPendH)}</b><span>horas que tapan ${c.vPlan} días de vacaciones (${r.vn} marcado${r.vn===1?"":"s"} en el calendario)</span></div>
-<div class="box hi"><b>${c.apTot} AP</b><span>te tocan: ${c.apH} por cómputo (${fmt(c.after)} h ÷ 7)${c.X.ld?` + ${c.X.ld} por ${c.X.tr} trienios`:""}</span></div>
+<div class="box hi"><b>${c.oweNet?`Debes ${c.oweNet}`:c.apTot+" AP"}</b><span>${c.oweNet?`turno${c.oweNet>1?"s":""} (${fmt(c.after)} h)`:`te tocan: ${c.apH} por cómputo (${sg(c.after)} h)${c.X.ld?` + ${c.X.ld} por ${c.X.tr} trienios`:""}`}${c.owe&&!c.oweNet?` − ${c.owe} que debes`:""}</span></div>
 <div class="box"><b>${r.ap} / ${c.apTot}</b><span>AP ya puestos (noche = 2)</span><div class="meter"><i style="width:${c.apTot?Math.min(100,r.ap/c.apTot*100):0}%"></i></div></div>
-<div class="box"><b>${sg(c.left)} h</b><span>te quedarías a final de año</span></div>
+<div class="box"><b>${sg(c.left)} h</b><span>saldo suelto: menos de ${fmt(c.thr)} h, no cuenta como turno</span></div>
 </div>
-<p class="verdict">${c.after<0?`Con ${c.vPlan} días de vacaciones te faltarían <b>${fmt(-c.after)} h</b> para llegar a la jornada: no te toca ningún AP.`:`Con ${c.vPlan} días de vacaciones te tocan <b>${c.apTot} AP</b>${c.apRest>0?` (te quedan <b>${c.apRest}</b> por poner)`:c.apRest<0?` (has puesto <b>${-c.apRest}</b> de más)`:" y ya los has puesto todos"}, y te quedarías con <b>${sg(c.left)} h</b> de saldo.`}</p>
+<p class="verdict">${c.oweNet?`Con ${c.vPlan} días de vacaciones te faltan <b>${fmt(-c.after)} h</b>: debes <b>${c.oweNet} turno${c.oweNet>1?"s":""}</b> y no te toca ningún AP.`:`Con ${c.vPlan} días de vacaciones te tocan <b>${c.apTot} AP</b>${c.apRest>0?` (te quedan <b>${c.apRest}</b> por poner)`:c.apRest<0?` (has puesto <b>${-c.apRest}</b> de más)`:" y ya los has puesto todos"}.`} El saldo suelto de <b>${sg(c.left)} h</b> no cuenta como turno.</p>
+<p class="note">Regla del saldo: lo que sobra o falta se cuenta en turnos de 7 h. Un resto de ${fmt(c.thr)} h o más, a favor o en contra, cuenta como un turno entero; por debajo no cuenta. Puedes cambiar ese límite en Ajustes.</p>
 <p class="note">${c.vPend?`Los ${c.vPend} días de vacaciones que aún no has marcado se estiman en ${fmt(c.avg)} h por día (media de tu cuadrante). Al marcarlos en el calendario se usan las horas exactas de los turnos que tapan: coger vacaciones sobre noches o semanas cargadas te deja más AP.`:`Todas las vacaciones están marcadas en el calendario: el cálculo usa las horas exactas.`}${r.bn||r.pn?` Tienes ${r.bn} días de baja y ${r.pn} de permiso retribuido: cuentan como trabajados, con las horas del turno que tapan.`:""}${r.ss?` ${r.ss} días sin sueldo: no cuentan horas y la jornada baja en proporción (${fmt(c.J)} h).`:""}${r.db?` Llevas ${r.db} doblaje${r.db>1?"s":""} (+${fmt(r.dbH)} h), ya sumados.`:""}</p>
 <p class="note">Estatuto Marco (Ley 55/2003): vacaciones de al menos 30 días naturales al año (art. 53), o la parte proporcional si no trabajas el año entero, y solo se pagan en dinero si dejas el puesto. Son 30 días naturales, no 31: la jornada del SERGAS se calcula sobre 329 días (365 − 30 de vacaciones − 6 de libre disposición). Si coges un mes entero de 31 días, ese día de más sale de tus AP o de tus horas. Los permisos y días de libre disposición los fija el SERGAS (art. 61): 6 días al año, ya incluidos en la jornada y por tanto en el cómputo, más 2 al cumplir el 6.º trienio y 1 más por trienio desde el 8.º. Por antigüedad hay 1 día extra de vacaciones a los 15 años, 2 a los 20, 3 a los 25 y 4 a los 30.${c.X.vac||c.X.ld?` Con ${S.antig} años te suman ${c.X.vac} día${c.X.vac===1?"":"s"} de vacaciones y ${c.X.ld} AP.`:` Pon tus años de servicio en Ajustes para sumarlos.`}</p>
 <button class="lnk" id="clrV">Quitar todas las vacaciones de ${y}</button> · <button class="lnk" id="clrA">Quitar todos los AP de ${y}</button>`;
@@ -424,7 +428,7 @@ const td=e.target.closest("td[data-d]");if(td){selDay=+td.dataset.d;renderCart()
 const who=e.target.closest("tbody th.who");if(!who)return;selNum=+who.closest("tr").dataset.n;renderCart();$("nump").scrollIntoView({behavior:"smooth",block:"nearest"})});
 $("cprev").addEventListener("click",()=>{cm--;if(cm<0){cm=11;cy--}selDay=null;render()});
 $("cnext").addEventListener("click",()=>{cm++;if(cm>11){cm=0;cy++}selDay=null;render()});
-const SETS=[["h-M","Horas mañana (M)","hours.M"],["h-T","Horas tarde (T)","hours.T"],["h-N","Horas noche (N)","hours.N"],["vacDef","Vacaciones base (días naturales)","vacDef"],["antig","Años de servicio (para días extra)","antig"],["jor","Jornada anual manual (vacío = tabla)","jor"]];
+const SETS=[["h-M","Horas mañana (M)","hours.M"],["h-T","Horas tarde (T)","hours.T"],["h-N","Horas noche (N)","hours.N"],["vacDef","Vacaciones base (días naturales)","vacDef"],["antig","Años de servicio (para días extra)","antig"],["thr","Resto que cuenta como turno (h)","thr"],["jor","Jornada anual manual (vacío = tabla)","jor"]];
 const getP=p=>p.split(".").reduce((o,k)=>o[k],S);
 const setP=(p,v)=>{const a=p.split(".");let o=S;while(a.length>1)o=o[a.shift()];o[a[0]]=v};
 function renderSet(){
