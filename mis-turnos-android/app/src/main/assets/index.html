@@ -122,7 +122,16 @@ table.cart th.who{cursor:pointer}
 :root[data-pal=contraste]{--M:#ffcc00;--Mi:#000;--T:#ff5a00;--Ti:#000;--N:#0019a8;--Ni:#fff;--V:#008a3e;--Vi:#fff;--B:#b0003a;--Bi:#fff;--A:#007c89;--Ai:#fff;--O:#444;--Oi:#fff}
 :root[data-pal=mar]{--M:#9bd8ff;--Mi:#00253d;--T:#2a8fe0;--Ti:#fff;--N:#0b2a5b;--Ni:#fff;--V:#7ed6a5;--Vi:#003018;--B:#e86a92;--Bi:#fff;--A:#36c5c5;--Ai:#002b2b;--O:#8a94a6;--Oi:#fff}
 :root[data-pal=otono]{--M:#f2c14e;--Mi:#3a2a00;--T:#d1603d;--Ti:#fff;--N:#5b3a70;--Ni:#fff;--V:#8bb174;--Vi:#1a2d0d;--B:#a23b5c;--Bi:#fff;--A:#3f9c8f;--Ai:#fff;--O:#7d7068;--Oi:#fff}
-:root[data-pal=gris]{--M:#e6e6e6;--Mi:#111;--T:#9e9e9e;--Ti:#000;--N:#2b2b2b;--Ni:#fff;--V:#6fbf8e;--Vi:#002a14;--B:#d06a8a;--Bi:#fff;--A:#5fb3bd;--Ai:#002b2f;--O:#777;--Oi:#fff}
+:root[data-pal=rea]{--g1:#e53935;--g1i:#fff;--g2:#ffd23f;--g2i:#2b2300;--g3:#43a047;--g3i:#fff;--g4:#9c6ade;--g4i:#fff;--g5:#1e6fd9;--g5i:#fff;--g6:#8a8f98;--g6i:#fff}
+:root[data-pal=rea] .gr1{background:var(--g1)!important;color:var(--g1i)!important;border-color:transparent!important}
+:root[data-pal=rea] .gr2{background:var(--g2)!important;color:var(--g2i)!important;border-color:transparent!important}
+:root[data-pal=rea] .gr3{background:var(--g3)!important;color:var(--g3i)!important;border-color:transparent!important}
+:root[data-pal=rea] .gr4{background:var(--g4)!important;color:var(--g4i)!important;border-color:transparent!important}
+:root[data-pal=rea] .gr5{background:var(--g5)!important;color:var(--g5i)!important;border-color:transparent!important}
+:root[data-pal=rea] .gr6{background:var(--g6)!important;color:var(--g6i)!important;border-color:transparent!important}
+.sw{display:none}
+:root[data-pal=rea] .qp .sw{display:inline-block;width:18px;height:18px;border-radius:5px;margin-right:10px;vertical-align:middle}
+:root[data-pal=rea] .gleg{display:flex}.gleg{display:none;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--mut);margin-top:8px}.gleg i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px}
 .d .db{position:absolute;left:3px;bottom:2px;font-size:10px;font-weight:800;background:var(--ink);color:var(--bg);border-radius:5px;padding:0 3px;line-height:14px;z-index:1}
 .crew{background:var(--card);border-radius:12px;padding:10px 12px;margin:12px 0 4px;font-size:14px}.crew b{display:inline-block;min-width:64px}
 .cartw{overflow-x:auto;margin:8px -4px;border:1px solid var(--line);border-radius:12px}
@@ -153,6 +162,7 @@ details.nm summary{cursor:pointer;font-weight:700;padding:10px 0}
 <div class="cal" id="cal"></div>
 <div class="live" id="live" aria-live="polite"></div>
 <div class="leg"><span><i style="background:var(--M)"></i>M mañana</span><span><i style="background:var(--T)"></i>T tarde</span><span><i style="background:var(--N)"></i>N noche</span><span><i style="background:var(--D)"></i>– saliente</span><span><i></i>L libre</span><span><i style="background:var(--V)"></i>franja VAC vacaciones</span><span><i style="background:var(--B)"></i>BAJA</span><span><i style="background:var(--A)"></i>AP</span><span><i style="background:var(--O)"></i>PERM otro permiso</span><span><i style="background:#e11d48;border-radius:50%"></i>✎ tiene nota</span><span>borde discontinuo = turno cambiado</span><span style="color:#d6293e">nº rojo = festivo</span></div>
+<div class="gleg"><span><i style="background:#e53935"></i>1 rojos</span><span><i style="background:#ffd23f"></i>2 amarillos</span><span><i style="background:#43a047"></i>3 verdes</span><span><i style="background:#9c6ade"></i>4 lila</span><span><i style="background:#1e6fd9"></i>5 azul</span><span><i style="background:#8a8f98"></i>6 gris</span></div>
 <p class="note">Toca un día para cambiar el turno, ponerle vacaciones o baja encima, o escribir una nota. Con «Probar vacaciones» cada toque pone o quita vacaciones al momento y abajo ves cómo cambia el cómputo.</p>
 <div id="notes"></div>
 <div id="st"></div>
@@ -303,8 +313,8 @@ while(t<=last){let wh=0;const w=rotWeek(t)+1;
 for(let i=0;i<7;i++,t+=DAY){const c=shift(t),l=layer(t),k=key(t),d=new Date(t);wh+=hoursAt(t);
 const cls=["d","c-"+(c==="-"?"D":c)];if(d.getUTCMonth()!==cm)cls.push("out");if(t===TODAY)cls.push("today");if(P().ov[k])cls.push("ch");if(fest(t))cls.push("fe");if(P().notes[k])cls.push("hn");if(l)cls.push("lay");
 const g=!l&&"MTN".includes(c)&&c===base(t)?grp(t):"";
-const dd=dbl(t);if(dd.length&&!l){cls[1]="split"}
-h+=`<button class="${cls.join(" ")}" data-k="${k}" aria-label="${d.getUTCDate()} ${MES[d.getUTCMonth()]}: ${c}${g}${l?", "+LLAB[l]:""}${P().notes[k]?", con nota":""}"><span class="n">${d.getUTCDate()}</span>${dd.length&&!l?`<span class="hf top c-${c==="-"?"D":c}"><span class="s">${c==="-"?"–":c}</span></span><span class="hf bot c-${dd[0]}"><span class="s">+${dd.join("")}</span></span>`:`<span class="s">${c==="-"?"–":c}</span>${g?`<span class="g">${g}</span>`:""}`}${l?`<span class="ly ly-${l}">${LLAB[l]}</span>`:""}${dd.length&&l?`<span class="db">+${dd.join("")}</span>`:""}</button>`}
+const dd=dbl(t);const gc=!l&&"MTN".includes(c)&&c.length===1&&c===base(t)&&grp(t)?"gr"+grp(t):"";if(dd.length&&!l){cls[1]="split"}else if(gc)cls.push(gc);
+h+=`<button class="${cls.join(" ")}" data-k="${k}" aria-label="${d.getUTCDate()} ${MES[d.getUTCMonth()]}: ${c}${g}${l?", "+LLAB[l]:""}${P().notes[k]?", con nota":""}"><span class="n">${d.getUTCDate()}</span>${dd.length&&!l?`<span class="hf top c-${c==="-"?"D":c} ${gc}"><span class="s">${c==="-"?"–":c}</span></span><span class="hf bot c-${dd[0]}"><span class="s">+${dd.join("")}</span></span>`:`<span class="s">${c==="-"?"–":c}</span>${g?`<span class="g">${g}</span>`:""}`}${l?`<span class="ly ly-${l}">${LLAB[l]}</span>`:""}${dd.length&&l?`<span class="db">+${dd.join("")}</span>`:""}</button>`}
 h+=`<div class="wk"><b>${fmt(wh)}</b>sem ${w}</div>`}
 $("cal").innerHTML=h;
 renderNotes();renderLive();renderBal();renderYear();renderChg();renderCart();
@@ -353,16 +363,16 @@ for(const b of $("qs").children)b.classList.toggle("on",b.dataset.c===qC);
 const d=new Date(qT),NAMES={M:"Mañana",T:"Tarde",N:"Noche"},HRS={M:"8–15 h",T:"15–22 h",N:"22–8 h"};
 const l=[];for(let n=1;n<=35;n++){const lay=layN(n,qT);const base=shiftN(n,qT)===qC&&!lay,ex=dblN(n,qT).includes(qC);if(base||ex){const ce=cellN(n,qT);l.push({n,me:n===S.n,g:ex&&!base?"doblaje":(ce[0]===qC&&ce.length>1?ce:"cambio")})}}
 l.sort((a,b)=>(b.me-a.me)||a.n-b.n);
-$("qres").innerHTML=`<div class="qhead">${NAMES[qC]} del ${["lunes","martes","miércoles","jueves","viernes","sábado","domingo"][dow(qT)]} ${d.getUTCDate()} de ${MES[d.getUTCMonth()]} · ${l.length} ${l.length===1?"persona":"personas"}</div>`+(l.length?`<div class="qlist">${l.map(p=>`<div class="qp${p.me?" me":""}"><span>${esc(nm(p.n))}${p.me?" (tú)":""}</span><small>${(S.names||{})[p.n]?"Nº "+p.n+" · ":""}${esc(p.g)}</small></div>`).join("")}</div>`:`<p class="note">Nadie de la lista en ese turno.</p>`)+`<p class="note">${HRS[qC]}. Los nombres los pones en Cartelera (tocando el número) o en Ajustes. Solo se tienen en cuenta los cambios que hayas apuntado tú; el resto sigue la rotación.</p>`;
+$("qres").innerHTML=`<div class="qhead">${NAMES[qC]} del ${["lunes","martes","miércoles","jueves","viernes","sábado","domingo"][dow(qT)]} ${d.getUTCDate()} de ${MES[d.getUTCMonth()]} · ${l.length} ${l.length===1?"persona":"personas"}</div>`+(l.length?`<div class="qlist">${l.map(p=>`<div class="qp${p.me?" me":""}"><span>${/^[MTN]\d$/.test(p.g)?`<i class="sw gr${p.g[1]}"></i>`:""}${esc(nm(p.n))}${p.me?" (tú)":""}</span><small>${(S.names||{})[p.n]?"Nº "+p.n+" · ":""}${esc(p.g)}</small></div>`).join("")}</div>`:`<p class="note">Nadie de la lista en ese turno.</p>`)+`<p class="note">${HRS[qC]}. Los nombres los pones en Cartelera (tocando el número) o en Ajustes. Solo se tienen en cuenta los cambios que hayas apuntado tú; el resto sigue la rotación.</p>`;
 }
 $("qprev").addEventListener("click",()=>{qT-=DAY;renderQuien()});
 $("qnext").addEventListener("click",()=>{qT+=DAY;renderQuien()});
 $("qdate").addEventListener("change",e=>{if(e.target.value){qT=parse(e.target.value);renderQuien()}});
 $("qs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;qC=b.dataset.c;renderQuien()});
-const PALS=[["","Clásico"],["pastel","Pastel"],["contraste","Alto contraste"],["mar","Mar"],["otono","Otoño"],["gris","Grises"]];
+const PALS=[["","Clásico"],["pastel","Pastel"],["contraste","Alto contraste"],["mar","Mar"],["otono","Otoño"],["rea","REA (por grupo)"]];
 function applyPal(){if(S.pal)document.documentElement.dataset.pal=S.pal;else delete document.documentElement.dataset.pal}
 function renderPals(){$("pals").innerHTML=PALS.map(([k,n])=>`<button class="pal${(S.pal||"")===k?" on":""}" data-p="${k}" style="${k?"":""}">${n}<br><span data-pal-prev="${k}">${["M","T","N"].map(c=>`<i class="c-${c}">${c}</i>`).join("")}</span></button>`).join("");
-for(const b of $("pals").querySelectorAll(".pal")){const k=b.dataset.p;const PV={"":["#ffd23f","#2b2300","#ff7a45","#2a0e00","#3b4cca","#fff"],pastel:["#ffe7a0","#4a3b00","#ffc7ad","#4a1a00","#b8c2ff","#101a5c"],contraste:["#ffcc00","#000","#ff5a00","#000","#0019a8","#fff"],mar:["#9bd8ff","#00253d","#2a8fe0","#fff","#0b2a5b","#fff"],otono:["#f2c14e","#3a2a00","#d1603d","#fff","#5b3a70","#fff"],gris:["#e6e6e6","#111","#9e9e9e","#000","#2b2b2b","#fff"]}[k];
+for(const b of $("pals").querySelectorAll(".pal")){const k=b.dataset.p;const PV={"":["#ffd23f","#2b2300","#ff7a45","#2a0e00","#3b4cca","#fff"],pastel:["#ffe7a0","#4a3b00","#ffc7ad","#4a1a00","#b8c2ff","#101a5c"],contraste:["#ffcc00","#000","#ff5a00","#000","#0019a8","#fff"],mar:["#9bd8ff","#00253d","#2a8fe0","#fff","#0b2a5b","#fff"],otono:["#f2c14e","#3a2a00","#d1603d","#fff","#5b3a70","#fff"],rea:["#e53935","#fff","#ffd23f","#2b2300","#43a047","#fff"]}[k];
 b.querySelectorAll("i").forEach((x,i)=>{x.style.background=PV[i*2];x.style.color=PV[i*2+1]})}}
 $("pals").addEventListener("click",e=>{const b=e.target.closest(".pal");if(!b)return;S.pal=b.dataset.p;applyPal();renderPals();save()});
 function renderNum(){
@@ -371,7 +381,7 @@ const n=selNum,days=new Date(Date.UTC(cy,cm+1,0)).getUTCDate(),f=utc(cy,cm,1);le
 for(let i=0;i<dow(f);i++)cells+="<span style='border:0'></span>";
 for(let d=1;d<=days;d++){const t=utc(cy,cm,d),c=shiftN(n,t),l=layN(n,t),db=dblN(n,t),ce=cellN(n,t);
 if(!(l==="V"||l==="AP"||l==="SS"))hrs+=sh(c);for(const x of db)hrs+=sh(x);
-cells+=`<span class="${l?"ly-"+l:"c-"+(c==="-"?"D":c)}"><small>${d}</small>${l?LLAB[l]:c==="-"?"–":c}${db.length?"+"+db.join(""):""}${!l&&ce[0]===c&&ce.length>1?`<small>${esc(ce.slice(1))}</small>`:""}</span>`}
+cells+=`<span class="${l?"ly-"+l:"c-"+(c==="-"?"D":c)}${!l&&ce[0]===c&&ce.length>1&&"MTN".includes(c)?" gr"+ce.slice(1):""}"><small>${d}</small>${l?LLAB[l]:c==="-"?"–":c}${db.length?"+"+db.join(""):""}${!l&&ce[0]===c&&ce.length>1?`<small>${esc(ce.slice(1))}</small>`:""}</span>`}
 el.innerHTML=`<div class="nump"><div class="hd"><div><label for="cnm">Nombre del Nº ${n}${n===S.n?" (tú)":""}</label><input id="cnm" data-n="${n}" maxlength="30" placeholder="Nº ${n}" value="${esc((S.names||{})[n]||"")}"></div><button class="nb" id="cnx" aria-label="Cerrar">×</button></div>
 <div class="note" style="margin-top:6px">${MES[cm]} ${cy}: ${fmt(hrs)} h</div>
 <div class="mini">${DOW.map(x=>`<span style="border:0;font-size:11px;color:var(--mut)">${x}</span>`).join("")}${cells}</div></div>`;
@@ -392,7 +402,7 @@ const cnt={M:Array(days+1).fill(0),T:Array(days+1).fill(0),N:Array(days+1).fill(
 for(let n=1;n<=35;n++){h+=`<tr data-n="${n}" class="${n===S.n?"me":""}"><th class="who" title="${esc(nm(n))}">${n}${S.names&&S.names[n]?" "+esc(S.names[n]):""}</th>`;
 for(let d=1;d<=days;d++){const t=utc(cy,cm,d),c=shiftN(n,t),l=layN(n,t),db=dblN(n,t);
 if(!l&&cnt[c])cnt[c][d]++;for(const x of db)cnt[x][d]++;
-const show=l?LLAB[l][0]:c==="-"?"–":c;const cls=l?"ly-"+l:"c-"+(c==="-"?"D":c);
+const show=l?LLAB[l][0]:c==="-"?"–":c;const ce2=cellN(n,t);const cls=(l?"ly-"+l:"c-"+(c==="-"?"D":c))+(!l&&"MTN".includes(c)&&ce2[0]===c&&ce2.length>1?" gr"+ce2.slice(1):"");
 h+=`<td data-d="${d}" class="${cls}${d===selDay?" sel":""}">${show}${db.length?"+":""}</td>`}
 h+="</tr>"}
 h+="</tbody><tfoot>"+["M","T","N"].map(c=>`<tr><th class="who">${c}</th>${cnt[c].slice(1).map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")+"</tfoot>";
